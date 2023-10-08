@@ -462,7 +462,8 @@ if __name__ == '__main__':
     if args.load:
         exit()
 
-    datasets = ['wikitext2', 'ptb', 'c4'] 
+    # datasets = ['wikitext2', 'ptb', 'c4'] 
+    datasets = ['wikitext2'] 
     if args.new_eval:
       datasets = ['wikitext2', 'ptb-new', 'c4-new']
     for dataset in datasets: 
