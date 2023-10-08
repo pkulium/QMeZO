@@ -1,4 +1,4 @@
-MODEL=${MODEL:-facebook/opt-1.3b}
+MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
 MODEL_NAME="${MODEL_NAME[-1]}"
 
