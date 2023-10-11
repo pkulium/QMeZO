@@ -27,7 +27,7 @@ def quantize():
 
     out = quant_model.generate(**inputs)
     print(tokenizer.decode(out[0], skip_special_tokens=True))
-
+quantize()
 """### Quantize a model by passing a custom dataset
 
 You can also quantize a model by passing a custom dataset, for that you can provide a list of strings to the quantization config. A good number of sample to pass is 128. If you do not pass enough data, the performance of the model will suffer.
