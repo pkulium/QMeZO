@@ -786,7 +786,7 @@ class OurTrainer(Trainer):
         self.zo_perturb_parameters(scaling_factor=1)
 
         loss0 = self.zo_forward(model, inputs)
-        self.projected_grad2 = ((loss1 + loss2 - 2 * loss0) / (2 * self.args.zo_eps * self.args.zo_eps)).item()
+        self.projected_grad0 = ((loss1 + loss2 - 2 * loss0) / (2 * self.args.zo_eps * self.args.zo_eps)).item()
         
         
         return loss1
@@ -805,9 +805,9 @@ class OurTrainer(Trainer):
             # Resample z
             z = torch.normal(mean=0, std=1, size=param.data.size(), device=param.data.device, dtype=param.data.dtype)
             if "bias" not in name and "layer_norm" not in name and "layernorm" not in name:
-                param.data = param.data - self._get_learning_rate() * (self.projected_grad * z + args.weight_decay * param.data + self.projected_grad1 * z * z)
+                param.data = param.data - self._get_learning_rate() * (self.projected_grad * z + args.weight_decay * param.data + self.projected_grad0 * z * z)
             else:
-                param.data = param.data - self._get_learning_rate() * (self.projected_grad * z + self.projected_grad1 * z * z)
+                param.data = param.data - self._get_learning_rate() * (self.projected_grad * z + self.projected_grad0 * z * z)
 
         self.lr_scheduler.step()
 
