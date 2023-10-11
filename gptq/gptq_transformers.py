@@ -1,7 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, GPTQConfig
 import torch
 
-model_id = "facebook/opt-1.3b"
+model_id = "facebook/opt-125m"
 
 quantization_config = GPTQConfig(
      bits=2,
