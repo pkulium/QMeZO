@@ -48,10 +48,11 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
-cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
 cover/
+
 # Translations
 *.mo
 *.pot
@@ -138,6 +139,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+*.sh
 .venv
 .vscode
 data
@@ -154,5 +156,6 @@ display.py
 llm_eval/result
 llm_eval/display_result.py
 llm_eval/data
+*.ipynb
 *.output
 *.pdf
