@@ -25,14 +25,15 @@ def quantize():
     text = "Hello my name is"
     inputs = tokenizer(text, return_tensors="pt").to(0)
 
-    out = quant_model.generate(**inputs)
+    out = quant_model.generate(*inputs)
     print(tokenizer.decode(out[0], skip_special_tokens=True))
 quantize()
-"""### Quantize a model by passing a custom dataset
 
+
+
+"""### Quantize a model by passing a custom dataset
 You can also quantize a model by passing a custom dataset, for that you can provide a list of strings to the quantization config. A good number of sample to pass is 128. If you do not pass enough data, the performance of the model will suffer.
 """
-
 def custom():
     from transformers import AutoModelForCausalLM, GPTQConfig, AutoTokenizer
 
@@ -57,6 +58,10 @@ def custom():
     print(tokenizer.decode(out[0], skip_special_tokens=True))
 
 
+
+
+
+
 """## Share quantized models on 🤗 Hub
 
 After quantizing the model, it can be used out-of-the-box for inference or you can push the quantized weights on the 🤗 Hub to share your quantized model with the community
@@ -74,10 +79,12 @@ Below we will load a llama 7b quantized in 4bit.
 """
 
 
+
+
+
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # model_id = "TheBloke/Llama-2-7b-Chat-GPTQ"
-model_id = "facebook/opt-125m"
 model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
@@ -86,10 +93,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 print(model)
 
 """As you can see, linear layers have been modified to `QuantLinear` modules from auto-gptq library.
-
 Furthermore, we can see that from the quantization config that we are using exllama kernel (`disable_exllama = False`). Note that it only works with 4-bit model.
 """
-
 model.config.quantization_config.to_dict()
 
 text = "Hello my name is"
