@@ -786,7 +786,7 @@ class OurTrainer(Trainer):
         self.zo_perturb_parameters(scaling_factor=1)
 
         loss0 = self.zo_forward(model, inputs)
-        self.projected_grad0 = ((loss1 + loss2 - 2 * loss0) / (2 * self.args.zo_eps * self.args.zo_eps)).item()
+        self.projected_grad0 = ((loss1 + loss2 - 2 * loss0) / (self.args.zo_eps * self.args.zo_eps)).item()
         
         
         return loss1
