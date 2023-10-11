@@ -25,7 +25,7 @@ def quantize():
     text = "Hello my name is"
     inputs = tokenizer(text, return_tensors="pt").to(0)
 
-    out = quant_model.generate(*inputs)
+    out = quant_model.generate(**inputs)
     print(tokenizer.decode(out[0], skip_special_tokens=True))
 quantize()
 
