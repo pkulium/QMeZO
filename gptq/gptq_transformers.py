@@ -76,7 +76,8 @@ Below we will load a llama 7b quantized in 4bit.
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_id = "TheBloke/Llama-2-7b-Chat-GPTQ"
+# model_id = "TheBloke/Llama-2-7b-Chat-GPTQ"
+model_id = "facebook/opt-125m"
 model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
@@ -104,7 +105,8 @@ Let's train the `llama-2` model using PEFT library from Hugging Face 🤗. We di
 
 from peft import prepare_model_for_kbit_training
 
-model_id = "TheBloke/Llama-2-7b-Chat-GPTQ"
+# model_id = "TheBloke/Llama-2-7b-Chat-GPTQ"
+model_id = "facebook/opt-125m"
 quantization_config_loading = GPTQConfig(bits=4, disable_exllama=True)
 model = AutoModelForCausalLM.from_pretrained(model_id,quantization_config=quantization_config_loading, device_map="auto")
 
