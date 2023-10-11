@@ -59,26 +59,14 @@ print(tokenizer.decode(out[0], skip_special_tokens=True))
 After quantizing the model, it can be used out-of-the-box for inference or you can push the quantized weights on the 🤗 Hub to share your quantized model with the community
 """
 
-from huggingface_hub import notebook_login
+# from huggingface_hub import notebook_login
 
-notebook_login()
+# notebook_login()
 
-quant_model.push_to_hub("opt-125m-gptq-4bit")
-tokenizer.push_to_hub("opt-125m-gptq-4bit")
+# quant_model.push_to_hub("opt-125m-gptq-4bit")
+# tokenizer.push_to_hub("opt-125m-gptq-4bit")
 
 """## Load quantized models from the 🤗 Hub
-
-You can load models that have been quantized using the auto-gptq library out of the box from the 🤗 Hub directly using `from_pretrained` method.
-
-Make sure that the model on the Hub have an attribute `quantization_config` on the model config file, with the field `quant_method` set to `"gptq"` as you can see below.
-
-
-<img src="https://huggingface.co/ybelkada/scratch-repo/resolve/main/images/gptq-example.png" width="300"/>
-
-Most used quantized models can be found under [TheBloke](https://huggingface.co/TheBloke) namespace that contains most used models converted with auto-gptq library. The integration should work with most of these models out of the box (to confirm and test).
-
-<img src="https://huggingface.co/ybelkada/scratch-repo/resolve/main/images/thebloke-example.png" width="800"/>
-
 Below we will load a llama 7b quantized in 4bit.
 """
 
