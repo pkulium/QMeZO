@@ -1,58 +1,61 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, GPTQConfig
 import torch
 
-model_id = "facebook/opt-125m"
+def quantize():
+    model_id = "facebook/opt-125m"
 
-quantization_config = GPTQConfig(
-     bits=4,
-     group_size=128,
-     dataset="c4",
-     desc_act=False,
-)
+    quantization_config = GPTQConfig(
+        bits=4,
+        group_size=128,
+        dataset="c4",
+        desc_act=False,
+    )
 
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-quant_model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config, device_map='auto')
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    quant_model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config, device_map='auto')
 
-"""You can make sure the model has been correctly quantized by checking the attributes of the linear layers, they should contain `qweight` and `qzeros` attributes that should be in `torch.int32` dtype."""
+    """You can make sure the model has been correctly quantized by checking the attributes of the linear layers, they should contain `qweight` and `qzeros` attributes that should be in `torch.int32` dtype."""
 
-quant_model.model.decoder.layers[0].self_attn.q_proj.__dict__
+    quant_model.model.decoder.layers[0].self_attn.q_proj.__dict__
 
-"""Now let's perform an inference on the quantized model. Use the same API as transformers!"""
+    """Now let's perform an inference on the quantized model. Use the same API as transformers!"""
 
-tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
-text = "Hello my name is"
-inputs = tokenizer(text, return_tensors="pt").to(0)
+    text = "Hello my name is"
+    inputs = tokenizer(text, return_tensors="pt").to(0)
 
-out = quant_model.generate(**inputs)
-print(tokenizer.decode(out[0], skip_special_tokens=True))
+    out = quant_model.generate(**inputs)
+    print(tokenizer.decode(out[0], skip_special_tokens=True))
 
 """### Quantize a model by passing a custom dataset
 
 You can also quantize a model by passing a custom dataset, for that you can provide a list of strings to the quantization config. A good number of sample to pass is 128. If you do not pass enough data, the performance of the model will suffer.
 """
 
-from transformers import AutoModelForCausalLM, GPTQConfig, AutoTokenizer
+def custom():
+    from transformers import AutoModelForCausalLM, GPTQConfig, AutoTokenizer
 
-model_id = "facebook/opt-125m"
+    model_id = "facebook/opt-125m"
 
-quantization_config = GPTQConfig(
-    bits=4,
-    group_size=128,
-    desc_act=False,
-    dataset=["auto-gptq is an easy-to-use model quantization library with user-friendly apis, based on GPTQ algorithm."]
-)
+    quantization_config = GPTQConfig(
+        bits=4,
+        group_size=128,
+        desc_act=False,
+        dataset=["auto-gptq is an easy-to-use model quantization library with user-friendly apis, based on GPTQ algorithm."]
+    )
 
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-quant_model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config, torch_dtype=torch.float16, device_map="auto")
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    quant_model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config, torch_dtype=torch.float16, device_map="auto")
 
-"""As you can see from the generation below, the performance seems to be slightly worse than the model quantized using the `c4` dataset."""
+    """As you can see from the generation below, the performance seems to be slightly worse than the model quantized using the `c4` dataset."""
 
-text = "My name is"
-inputs = tokenizer(text, return_tensors="pt").to(0)
+    text = "My name is"
+    inputs = tokenizer(text, return_tensors="pt").to(0)
 
-out = quant_model.generate(**inputs)
-print(tokenizer.decode(out[0], skip_special_tokens=True))
+    out = quant_model.generate(**inputs)
+    print(tokenizer.decode(out[0], skip_special_tokens=True))
+
 
 """## Share quantized models on 🤗 Hub
 
@@ -69,6 +72,7 @@ After quantizing the model, it can be used out-of-the-box for inference or you c
 """## Load quantized models from the 🤗 Hub
 Below we will load a llama 7b quantized in 4bit.
 """
+
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
