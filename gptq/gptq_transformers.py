@@ -4,7 +4,7 @@ import torch
 model_id = "facebook/opt-125m"
 
 quantization_config = GPTQConfig(
-     bits=2,
+     bits=4,
      group_size=128,
      dataset="c4",
      desc_act=False,
