@@ -361,11 +361,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        'model', type=str,
+        '--model', type=str,
         help='OPT model to load; pass `facebook/opt-X`.'
     )
     parser.add_argument(
-        'dataset', type=str, choices=['wikitext2', 'ptb', 'c4'],
+        '--dataset', type=str, choices=['wikitext2', 'ptb', 'c4'],
         help='Where to extract calibration data from.'
     )
     parser.add_argument(
