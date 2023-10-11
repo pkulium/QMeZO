@@ -155,6 +155,5 @@ display.py
 llm_eval/result
 llm_eval/display_result.py
 llm_eval/data
-*.ipynb
 *.output
 *.pdf
