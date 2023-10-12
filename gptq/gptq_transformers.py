@@ -1,6 +1,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, GPTQConfig
 import torch
-
+# (Pdb) b /home/pkulium/.conda/envs/torch/lib/python3.9/site-packages/auto_gptq/nn_modules/qlinear/qlinear_cuda_o
 def quantize():
     model_id = "facebook/opt-125m"
 
