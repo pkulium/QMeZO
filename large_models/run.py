@@ -166,7 +166,7 @@ class Framework:
             #         max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
             #         load_in_8bit=self.args.load_int8,
             #     )
-            quantized_model_dir = "opt-13b-2bit-128g"
+            quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
             from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
             quantize_config = BaseQuantizeConfig(
                 bits=2,  # quantize model to 4-bit
