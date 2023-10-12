@@ -5,7 +5,7 @@ def quantize():
     model_id = "facebook/opt-125m"
 
     quantization_config = GPTQConfig(
-        bits=4,
+        bits=2,
         group_size=128,
         dataset="c4",
         desc_act=False,
