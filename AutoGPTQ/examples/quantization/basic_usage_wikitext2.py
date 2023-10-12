@@ -141,17 +141,17 @@ def main():
     )
 
     # load un-quantized model, the model will always be force loaded into cpu
-    model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
+    # model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
 
     # quantize model, the examples should be list of dict whose keys can only be "input_ids" and "attention_mask" 
     # with value under torch.LongTensor type.
-    model.quantize(traindataset, use_triton=False)
+    # model.quantize(traindataset, use_triton=False)
 
     # save quantized model
-    model.save_quantized(quantized_model_dir)
+    # model.save_quantized(quantized_model_dir)
 
     # save quantized model using safetensors
-    model.save_quantized(quantized_model_dir, use_safetensors=True)
+    # model.save_quantized(quantized_model_dir, use_safetensors=True)
 
     # load quantized model, currently only support cpu or single gpu
     model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
