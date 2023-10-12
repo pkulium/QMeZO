@@ -1,3 +1,9 @@
+git pull
+MODEL=facebook/opt-13b
+TASK=SST2 
+MODE=ft 
+LR=1e-7 
+EPS=1e-3 
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
 MODEL_NAME="${MODEL_NAME[-1]}"
