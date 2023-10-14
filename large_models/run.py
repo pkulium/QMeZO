@@ -203,15 +203,14 @@ def custom_forward(self, x):
 
 def add_mezo_parts(model):
     for name, module in model.named_modules():
-        if name not in ['k_proj', 'out_proj', 'q_proj', 'v_proj', 'fc1', 'fc2']:
-            continue
-        mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
-        torch.nn.init.zeros_(mezo_part)
-        mezo_part.to(device=module.weight.device, dtype=module.weight.dtype)
-        mezo_part.weight.requires_grad = True
-        mezo_part.bias.requires_grad = True
-        module.mezo_part = mezo_part
-        module.forward = custom_forward.__get__(module)
+        if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
+            mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
+            torch.nn.init.zeros_(mezo_part)
+            mezo_part.to(device=module.weight.device, dtype=module.weight.dtype)
+            mezo_part.weight.requires_grad = True
+            mezo_part.bias.requires_grad = True
+            module.mezo_part = mezo_part
+            module.forward = custom_forward.__get__(module)
 
 class Framework:
 
