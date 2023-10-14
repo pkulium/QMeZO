@@ -207,7 +207,7 @@ def add_mezo_parts(model):
             mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
             torch.nn.init.zeros_(mezo_part.weight)
             torch.nn.init.zeros_(mezo_part.bias)
-            mezo_part.to(device=module.weight.device, dtype=module.weight.dtype)
+            mezo_part.to(device=module.device, dtype=model.dtype)
             mezo_part.weight.requires_grad = True
             mezo_part.bias.requires_grad = True
             module.mezo_part = mezo_part
