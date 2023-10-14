@@ -203,7 +203,7 @@ def custom_forward(self, x):
 
 def add_mezo_parts(model):
     for name, module in model.named_modules():
-        if 'QuantLinear' not in name:
+        if name not in ['k_proj', 'out_proj', 'q_proj', 'v_proj', 'fc1', 'fc2']:
             continue
         mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
         torch.nn.init.zeros_(mezo_part)
