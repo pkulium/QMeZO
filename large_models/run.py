@@ -118,6 +118,100 @@ def set_seed(seed: int):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
+def custom_forward(self, x):
+        out_shape = x.shape[:-1] + (self.outfeatures,)
+        x = x.reshape(-1, x.shape[-1])
+        if self.autogptq_cuda_available is True and (
+            self.kernel_switch_threshold is False or x.shape[0] < self.kernel_switch_threshold
+        ):
+            out = torch.zeros(x.shape[0], out_shape[-1], dtype=torch.float, device=x.device)
+            if self.use_cuda_fp16:
+                x = x.half()
+                if self.bits == 2:
+                    self.autogptq_cuda.vecquant2matmul_faster_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size, self.half_indim)
+                elif self.bits == 3:
+                    self.autogptq_cuda.vecquant3matmul_faster_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size, self.half_indim)
+                elif self.bits == 4:
+                    self.autogptq_cuda.vecquant4matmul_faster_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size, self.half_indim)
+
+                else:
+                    raise NotImplementedError("Only 2,3,4 bits are supported.")
+            else:
+                x = x.float()
+                if self.bits == 2:
+                    self.autogptq_cuda.vecquant2matmul_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size)
+                elif self.bits == 3:
+                    self.autogptq_cuda.vecquant3matmul_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size)
+                elif self.bits == 4:
+                    self.autogptq_cuda.vecquant4matmul_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size)
+                elif self.bits == 8:
+                    self.autogptq_cuda.vecquant8matmul_old(x, self.qweight, out, self.scales.float(), self.qzeros, self.group_size)
+                else:
+                    raise NotImplementedError("Only 2,3,4,8 bits are supported.")
+        else:
+            if self.wf.device != self.qzeros.device:
+               self.wf = self.wf.to(self.qzeros.device)
+                
+            if self.bits in [2,4,8]:
+               zeros = torch.bitwise_right_shift(torch.unsqueeze(self.qzeros, 2).expand(-1, -1, 32 // self.bits), self.wf.unsqueeze(0)).to(torch.int16 if self.bits == 8 else torch.int8)
+               torch.bitwise_and(zeros, (2 ** self.bits) - 1, out=zeros)
+                   
+               zeros = zeros + 1
+               zeros = zeros.reshape(-1, 1, zeros.shape[1] * zeros.shape[2])
+   
+               scales = self.scales
+               scales = scales.reshape(-1, 1, scales.shape[-1])
+                
+               weight = torch.bitwise_right_shift(torch.unsqueeze(self.qweight, 1).expand(-1, 32 // self.bits, -1), self.wf.unsqueeze(-1)).to(torch.int16 if self.bits == 8 else torch.int8)
+               torch.bitwise_and(weight,(2 ** self.bits) - 1, out=weight)
+               weight = weight.reshape(-1, self.group_size, weight.shape[2])
+            elif self.bits == 3:
+               zeros = self.qzeros.reshape(self.qzeros.shape[0], self.qzeros.shape[1]//3, 3, 1).expand(-1, -1, -1, 12)
+               zeros = (zeros >> self.wf.unsqueeze(0))
+               zeros[:,:,0,10] = (zeros[:,:,0,10]&0x3) | ((zeros[:,:,1,0] << 2)&0x4)
+               zeros[:,:,1,11] = (zeros[:,:,1,11]&0x1) | ((zeros[:,:,2,0] << 1)&0x6)
+               zeros = zeros & 0x7
+               zeros = torch.cat([zeros[:,:,0,:11], zeros[:,:,1,1:12], zeros[:,:,2,1:11]], dim=2)
+                
+               zeros = zeros + 1
+               zeros = zeros.reshape(-1, 1, zeros.shape[1] * zeros.shape[2]) 
+               
+               scales = self.scales
+               scales = scales.reshape(-1, 1, scales.shape[-1])
+                
+               weight = self.qweight.reshape(self.qweight.shape[0]//3, 3, 1, self.qweight.shape[1]).expand(-1, -1, 12, -1)
+               weight = (weight >> self.wf.unsqueeze(-1))&0x7
+               weight[:,0,10] = (weight[:,0,10]&0x3) | ((weight[:,1,0] << 2)&0x4)
+               weight[:,1,11] = (weight[:,1,11]&0x1) | ((weight[:,2,0] << 1)&0x6)
+               weight = weight & 0x7
+               weight = torch.cat([weight[:,0,:11], weight[:,1,1:12], weight[:,2,1:11]], dim=1)
+               weight = weight.reshape(-1, self.group_size, weight.shape[2])
+            else:
+               raise NotImplementedError("Only 2,3,4,8 bits are supported.")
+            weight = (scales * (weight - zeros))
+            weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
+
+            out = torch.matmul(x.half(), weight)
+        out = out.half().reshape(out_shape)
+        out = out + self.bias if self.bias is not None else out
+
+        out1 = self.mezo_part(x.half())
+        out1 = out1.half().reshape(out_shape)
+        out += out1
+
+        return out
+
+def add_mezo_parts(model):
+    for name, module in model.named_modules():
+        if 'QuantLinear' not in name:
+            continue
+        mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
+        torch.nn.init.zeros_(mezo_part)
+        mezo_part.to(device=module.weight.device, dtype=module.weight.dtype)
+        mezo_part.weight.requires_grad = True
+        mezo_part.bias.requires_grad = True
+        module.mezo_part = mezo_part
+        module.forward = custom_forward.__get__(module)
 
 class Framework:
 
@@ -175,6 +269,7 @@ class Framework:
             )
             model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
             model.eval()
+            add_mezo_parts(model)
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)

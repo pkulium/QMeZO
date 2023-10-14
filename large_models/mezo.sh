@@ -48,6 +48,7 @@ case $TASK in
         ;;
 esac
 
+# /home/pkulium/.conda/envs/mezo/lib/python3.11/site-packages/auto_gptq/nn_modules/qlinear/__init__.py
 echo $TAG
 echo "BS: $BS"
 echo "LR: $LR"
