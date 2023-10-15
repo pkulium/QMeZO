@@ -235,44 +235,44 @@ class Framework:
                 # Untie embeddings/LM head
                 logger.warn("Untie embeddings and LM head")
                 config.tie_word_embeddings = False
-            # if self.args.head_tuning:
-            #     # Head tuning
-            #     from ht_opt import OPTForCausalLM
-            #     model = OPTForCausalLM.from_pretrained(
-            #         self.args.model_name,
-            #         config=config,
-            #     )
-            # elif self.args.no_auto_device:
-            #     # No auto device (use for FSDP)
-            #     model = AutoModelForCausalLM.from_pretrained(
-            #         self.args.model_name,
-            #         config=config,
-            #     )
-            # else:
-            #     # Auto device loading
-            #     torch_dtype = torch.float32
-            #     if self.args.load_float16:
-            #         torch_dtype = torch.float16
-            #     elif self.args.load_bfloat16:
-            #         torch_dtype = torch.bfloat16
-            #     model = AutoModelForCausalLM.from_pretrained(
-            #         self.args.model_name,
-            #         config=config,
-            #         device_map='auto',
-            #         torch_dtype=torch_dtype,
-            #         max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
-            #         load_in_8bit=self.args.load_int8,
-            #     )
-            quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
-            from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-            quantize_config = BaseQuantizeConfig(
-                bits=2,  # quantize model to 4-bit
-                group_size=128,  # it is recommended to set the value to 128
-                desc_act=False,  # desc_act and group size only works on triton
-            )
-            model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
-            model.eval()
-            add_mezo_parts(model)
+            if self.args.head_tuning:
+                # Head tuning
+                from ht_opt import OPTForCausalLM
+                model = OPTForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                )
+            elif self.args.no_auto_device:
+                # No auto device (use for FSDP)
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                )
+            else:
+                # Auto device loading
+                torch_dtype = torch.float32
+                if self.args.load_float16:
+                    torch_dtype = torch.float16
+                elif self.args.load_bfloat16:
+                    torch_dtype = torch.bfloat16
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                    device_map='auto',
+                    torch_dtype=torch_dtype,
+                    max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
+                    load_in_8bit=self.args.load_int8,
+                )
+            # quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
+            # from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+            # quantize_config = BaseQuantizeConfig(
+            #     bits=2,  # quantize model to 4-bit
+            #     group_size=128,  # it is recommended to set the value to 128
+            #     desc_act=False,  # desc_act and group size only works on triton
+            # )
+            # model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
+            # model.eval()
+            # add_mezo_parts(model)
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
