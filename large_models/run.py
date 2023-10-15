@@ -270,8 +270,7 @@ class Framework:
             add_mezo_parts(model)
 
         # Load tokenizer
-        # tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
-        tokenizer = AutoTokenizer.from_pretrained(model, use_fast=False)
+        tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
 
         # HF tokenizer bug fix
         if "opt" in self.args.model_name:
