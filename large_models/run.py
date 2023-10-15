@@ -215,6 +215,7 @@ def add_mezo_parts(model):
             mezo_part.bias.requires_grad = True
             module.mezo_part = mezo_part
             module.forward = custom_forward.__get__(module)
+            module.use_cuda_fp16 = True
 
 class Framework:
 
