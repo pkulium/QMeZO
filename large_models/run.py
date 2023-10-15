@@ -265,7 +265,7 @@ class Framework:
             #     )
             quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
             from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-            model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False, quantize_config = config)
+            model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
             model.eval()
             add_mezo_parts(model)
 
