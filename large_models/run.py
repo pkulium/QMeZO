@@ -231,10 +231,10 @@ class Framework:
         with count_time("Loading model with FP%d" % (16 if self.args.load_float16 else 32)):
             free_in_GB = int(torch.cuda.mem_get_info()[0]/1024**3)
             config = AutoConfig.from_pretrained(self.args.model_name)
-            # if self.args.untie_emb:
-            #     # Untie embeddings/LM head
-            #     logger.warn("Untie embeddings and LM head")
-            #     config.tie_word_embeddings = False
+            if self.args.untie_emb:
+                # Untie embeddings/LM head
+                logger.warn("Untie embeddings and LM head")
+                config.tie_word_embeddings = False
             # if self.args.head_tuning:
             #     # Head tuning
             #     from ht_opt import OPTForCausalLM
@@ -265,6 +265,11 @@ class Framework:
             #     )
             quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
             from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+            quantize_config = BaseQuantizeConfig(
+                bits=2,  # quantize model to 4-bit
+                group_size=128,  # it is recommended to set the value to 128
+                desc_act=False,  # desc_act and group size only works on triton
+            )
             model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
             model.eval()
             add_mezo_parts(model)
