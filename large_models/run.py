@@ -217,6 +217,7 @@ def add_mezo_parts(model):
             module.forward = custom_forward.__get__(module)
             module.use_cuda_fp16 = True
             module.trainable = True
+            module.autogptq_cuda_available = False
 
 class Framework:
 

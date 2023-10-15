@@ -150,7 +150,7 @@ def main():
     # save quantized model
     model.save_quantized(quantized_model_dir)
 
-    # save quantized model using safetensors
+    # save quantized model using ssafetensors
     model.save_quantized(quantized_model_dir, use_safetensors=True)
 
     # load quantized model, currently only support cpu or single gpu
