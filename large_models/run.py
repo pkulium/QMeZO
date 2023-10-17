@@ -199,7 +199,8 @@ def custom_forward(self, x):
         # out1 = self.mezo_part(x.half())
         # out1 = out1.half().reshape(out_shape)
         # out += out1
-
+        if self.name == 'model.model.decoder.layers.3.self_attn.k_proj':
+            print(self.mezo_part.weight[0:8, 0:8])
         return out
 
 def add_mezo_parts(model):
@@ -214,6 +215,7 @@ def add_mezo_parts(model):
             mezo_part.to(device=model.device, dtype=model.dtype)
             mezo_part.weight.requires_grad = True
             mezo_part.bias.requires_grad = True
+            mezo_part.name = name
             module.mezo_part = mezo_part
             module.forward = custom_forward.__get__(module)
             module.use_cuda_fp16 = True
