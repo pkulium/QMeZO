@@ -199,8 +199,8 @@ def custom_forward(self, x):
         # out1 = self.mezo_part(x.half())
         # out1 = out1.half().reshape(out_shape)
         # out += out1
-        if self.name == 'model.model.decoder.layers.3.self_attn.k_proj':
-            print(self.mezo_part.weight[0:8, 0:8])
+        if self.mezo_part.name == 'model.model.decoder.layers.3.self_attn.k_proj':
+            print(self.mezo_part.weight[0:8])
         return out
 
 def add_mezo_parts(model):
