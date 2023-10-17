@@ -191,7 +191,7 @@ def custom_forward(self, x):
             weight = (scales * (weight - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
-            weight += self.mezo_part.weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
+            weight += self.mezo_part.weight.reshape(weight.shape)
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
