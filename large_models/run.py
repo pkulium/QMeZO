@@ -196,9 +196,6 @@ def custom_forward(self, x):
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
         out += self.mezo_part.bias
-        # out1 = self.mezo_part(x.half())
-        # out1 = out1.half().reshape(out_shape)
-        # out += out1
 
         return out
 
@@ -270,7 +267,8 @@ class Framework:
             from auto_gptq import AutoGPTQForCausalLM
             model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
             model.eval()
-            add_mezo_parts(model)
+            if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
+                add_mezo_parts(model)
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
