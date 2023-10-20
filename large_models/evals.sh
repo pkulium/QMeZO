@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Array of tasks
-TASKS=("SST" "RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "Copa" "ReCoRD" "SQuAD" "DROP")
+TASKS=("SST2" "RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "Copa" "ReCoRD" "SQuAD" "DROP")
 
 # Your main script content goes here.
 main_script() {
