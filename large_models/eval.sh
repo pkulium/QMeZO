@@ -64,7 +64,7 @@ python run.py \
     --task_name $TASK \
     --output_dir result/$TASK-${MODEL_NAME}-$TAG --tag $TAG --num_train $TRAIN --num_eval $EVAL --logging_steps 10 \
     --max_steps $STEPS \
-    --trainer zo --load_float16 \
+    --load_float16 \
     --learning_rate $LR --zo_eps $EPS --per_device_train_batch_size $BS --lr_scheduler_type "constant" \
     --load_best_model_at_end --evaluation_strategy steps --save_strategy steps --save_total_limit 1 \
     --eval_steps $EVAL_STEPS --save_steps $EVAL_STEPS \
