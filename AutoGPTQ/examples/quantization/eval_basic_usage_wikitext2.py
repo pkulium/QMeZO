@@ -152,13 +152,13 @@ def main():
     model.quantize(traindataset, use_triton=False)
 
     # save quantized model
-    model.save_quantized(quantized_model_dir)
+    # model.save_quantized(quantized_model_dir)
 
     # save quantized model using ssafetensors
-    model.save_quantized(quantized_model_dir, use_safetensors=True)
+    # model.save_quantized(quantized_model_dir, use_safetensors=True)
 
     # load quantized model, currently only support cpu or single gpu
-    model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
+    # model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
 
     opt_eval(model.model, testenc, "cuda:0")
 
