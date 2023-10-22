@@ -139,7 +139,7 @@ def main():
     traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
 
     quantize_config = BaseQuantizeConfig(
-        bits=1,  # quantize model to 4-bit
+        bits=2,  # quantize model to 4-bit
         group_size=128,  # it is recommended to set the value to 128
         desc_act=False,  # desc_act and group size only works on triton   
     )
