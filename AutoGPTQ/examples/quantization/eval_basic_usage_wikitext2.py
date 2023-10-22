@@ -6,12 +6,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-pretrained_model_dir = "facebook/opt-13b"
-quantized_model_dir = "opt-13b-2bit-128g"
+# pretrained_model_dir = "facebook/opt-13b"
+# quantized_model_dir = "opt-13b-2bit-128g"
 
 
-# pretrained_model_dir = "facebook/opt-125m"
-# quantized_model_dir = "opt-125m-2bit-128g"
+pretrained_model_dir = "facebook/opt-125m"
+quantized_model_dir = "opt-125m-2bit-128g"
 
 # os.makedirs(quantized_model_dir, exist_ok=True)
 def get_wikitext2(nsamples, seed, seqlen, model):
@@ -138,24 +138,24 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_dir, use_fast=True)
     traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
 
-    # quantize_config = BaseQuantizeConfig(
-    #     bits=2,  # quantize model to 4-bit
-    #     group_size=128,  # it is recommended to set the value to 128
-    #     desc_act=False,  # desc_act and group size only works on triton
-    # )
+    quantize_config = BaseQuantizeConfig(
+        bits=2,  # quantize model to 4-bit
+        group_size=128,  # it is recommended to set the value to 128
+        desc_act=False,  # desc_act and group size only works on triton   
+    )
 
-    # # load un-quantized model, the model will always be force loaded into cpu
-    # model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
+    # load un-quantized model, the model will always be force loaded into cpu
+    model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
 
-    # # quantize model, the examples should be list of dict whose keys can only be "input_ids" and "attention_mask" 
-    # # with value under torch.LongTensor type.
-    # model.quantize(traindataset, use_triton=False)
+    # quantize model, the examples should be list of dict whose keys can only be "input_ids" and "attention_mask" 
+    # with value under torch.LongTensor type.
+    model.quantize(traindataset, use_triton=False)
 
-    # # save quantized model
-    # model.save_quantized(quantized_model_dir)
+    # save quantized model
+    model.save_quantized(quantized_model_dir)
 
-    # # save quantized model using ssafetensors
-    # model.save_quantized(quantized_model_dir, use_safetensors=True)
+    # save quantized model using ssafetensors
+    model.save_quantized(quantized_model_dir, use_safetensors=True)
 
     # load quantized model, currently only support cpu or single gpu
     model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
