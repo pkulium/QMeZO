@@ -533,7 +533,7 @@ class Framework:
             trainer.save_model()
         
         # FSDP compatibility
-        # self.model = trainer.model 
+        self.model = trainer.model 
         
         # Reset the forward function for evaluation
         if self.args.only_train_option and not self.args.non_diff:
