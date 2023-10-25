@@ -536,12 +536,12 @@ class Framework:
         self.model = trainer.model 
         
         # Reset the forward function for evaluation
-        # if self.args.only_train_option and not self.args.non_diff:
-        #     if type(self.model) == FSDP:
-        #         logger.info("This is an FSDP model now. Be careful when assigning back the original forward function")
-        #         self.model._fsdp_wrapped_module.forward = self.model._fsdp_wrapped_module.original_forward
-        #     else:
-        #         self.model.forward = self.model.original_forward
+        if self.args.only_train_option and not self.args.non_diff:
+            if type(self.model) == FSDP:
+                logger.info("This is an FSDP model now. Be careful when assigning back the original forward function")
+                self.model._fsdp_wrapped_module.forward = self.model._fsdp_wrapped_module.original_forward
+            else:
+                self.model.forward = self.model.original_forward
 
 
 def result_file_tag(args):
