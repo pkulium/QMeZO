@@ -621,7 +621,6 @@ class OurTrainer(Trainer):
                     #     self._maybe_log_save_evaluate(tr_loss, model, trial, epoch, ignore_keys_for_eval)
                     # except Exception:
                     #     pass
-                    self._maybe_log_save_evaluate(tr_loss, model, trial, epoch, ignore_keys_for_eval)
                 else:
                     self.control = self.callback_handler.on_substep_end(args, self.state, self.control)
 
@@ -640,7 +639,6 @@ class OurTrainer(Trainer):
             #     self._maybe_log_save_evaluate(tr_loss, model, trial, epoch, ignore_keys_for_eval)
             # except Exception:
             #     pass
-            self._maybe_log_save_evaluate(tr_loss, model, trial, epoch, ignore_keys_for_eval)
 
             if DebugOption.TPU_METRICS_DEBUG in self.args.debug:
                 if is_torch_tpu_available():
