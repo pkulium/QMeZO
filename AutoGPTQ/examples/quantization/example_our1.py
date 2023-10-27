@@ -1,7 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from optimum.gptq import GPTQQuantizer, load_quantized_model
 import torch
-
+import torch.nn as nn
 
 @torch.no_grad()
 def opt_eval(model, testenc, dev, seqlen = 2048):
