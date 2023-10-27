@@ -4,8 +4,8 @@ import torch
 
 model_name = "facebook/opt-125m"
 device = 'cuda:0'
-tokenizer = AutoTokenizer.from_pretrained(model_name).to(device)
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16).to(device)
+tokenizer = AutoTokenizer.from_pretrained(model_name, device = device)
+model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device = device)
 
 quantizer = GPTQQuantizer(bits=4, dataset="c4", block_name_to_quantize = "model.decoder.layers", model_seqlen = 2048)
 quantized_model = quantizer.quantize_model(model, tokenizer)
