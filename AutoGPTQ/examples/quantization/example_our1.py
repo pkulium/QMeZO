@@ -2,14 +2,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from optimum.gptq import GPTQQuantizer, load_quantized_model
 import torch
 
-model_name = "facebook/opt-125m"
-device = 'cuda:0'
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16)
-
-quantizer = GPTQQuantizer(bits=4, dataset="c4", block_name_to_quantize = "model.decoder.layers", model_seqlen = 2048)
-quantized_model = quantizer.quantize_model(model, tokenizer, device="cuda:0")
-
 
 @torch.no_grad()
 def opt_eval(model, testenc, dev, seqlen = 2048):
@@ -103,6 +95,7 @@ def opt_eval(model, testenc, dev, seqlen = 2048):
     print(ppl.item())
 
     model.config.use_cache = use_cache
+
 import numpy as np
 # os.makedirs(quantized_model_dir, exist_ok=True)
 def get_wikitext2(nsamples, seed, seqlen, model):
@@ -131,6 +124,15 @@ def get_wikitext2(nsamples, seed, seqlen, model):
         attention_mask = torch.ones_like(inp)
         traindataset.append({'input_ids':inp,'attention_mask': attention_mask})
     return traindataset, testenc
+
+
+model_name = "facebook/opt-125m"
+device = 'cuda:0'
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16)
+
+quantizer = GPTQQuantizer(bits=4, dataset="c4", block_name_to_quantize = "model.decoder.layers", model_seqlen = 2048)
+quantized_model = quantizer.quantize_model(model, tokenizer)
 
 traindataset,testenc = get_wikitext2(128, 0, 2048, model_name)
 opt_eval(quantized_model, testenc, "cuda:0")
