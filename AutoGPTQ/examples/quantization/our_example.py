@@ -134,11 +134,58 @@ def opt_eval(model, testenc, dev, seqlen = 2048):
 
     model.config.use_cache = use_cache
 
+def get_c4(nsamples, seed, seqlen, model):
+    from datasets import load_dataset
+    traindata = load_dataset(
+        'allenai/c4', 'allenai--c4', data_files={'train': 'en/c4-train.00000-of-01024.json.gz'}, split='train'
+    )
+    valdata = load_dataset(
+        'allenai/c4', 'allenai--c4', data_files={'validation': 'en/c4-validation.00000-of-00008.json.gz'}, split='validation'
+    )
 
+    from transformers import AutoTokenizer
+    tokenizer = AutoTokenizer.from_pretrained(model, use_fast=False)
+
+    import random
+    random.seed(seed)
+    trainloader = []
+    for _ in range(nsamples):
+        while True:
+            i = random.randint(0, len(traindata) - 1)
+            trainenc = tokenizer(traindata[i]['text'], return_tensors='pt')
+            if trainenc.input_ids.shape[1] >= seqlen:
+                break
+        i = random.randint(0, trainenc.input_ids.shape[1] - seqlen - 1)
+        j = i + seqlen
+        inp = trainenc.input_ids[:, i:j]
+        tar = inp.clone()
+        tar[:, :-1] = -100
+        trainloader.append((inp, tar))
+
+    import random
+    random.seed(0)
+    valenc = []
+    for _ in range(256):
+        while True:
+            i = random.randint(0, len(valdata) - 1)
+            tmp = tokenizer(valdata[i]['text'], return_tensors='pt')
+            if tmp.input_ids.shape[1] >= seqlen:
+                break
+        i = random.randint(0, tmp.input_ids.shape[1] - seqlen - 1)
+        j = i + seqlen
+        valenc.append(tmp.input_ids[:, i:j])
+    valenc = torch.hstack(valenc)
+    class TokenizerWrapper:
+        def __init__(self, input_ids):
+            self.input_ids = input_ids
+    valenc = TokenizerWrapper(valenc)
+
+    return trainloader, valenc 
 
 def main():
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_dir, use_fast=True)
-    traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
+    # traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
+    traindataset,testenc = get_c4(128, 0, 2048, pretrained_model_dir)
 
     quantize_config = BaseQuantizeConfig(
         bits=2,  # quantize model to 4-bit
