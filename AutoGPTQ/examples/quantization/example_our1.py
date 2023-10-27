@@ -126,13 +126,9 @@ def get_wikitext2(nsamples, seed, seqlen, model):
     return traindataset, testenc
 
 
-model_name = "facebook/opt-125m"
-device = 'cuda:0'
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16)
+from transformers import AutoModelForCausalLM, AutoTokenizer, GPTQConfig
 
-quantizer = GPTQQuantizer(bits=4, dataset="c4", block_name_to_quantize = "model.decoder.layers", model_seqlen = 2048)
-quantized_model = quantizer.quantize_model(model, tokenizer)
-
-traindataset,testenc = get_wikitext2(128, 0, 2048, model_name)
-opt_eval(quantized_model, testenc, "cuda:0")
+model_id = "facebook/opt-125m"
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+quantization_config = GPTQConfig(bits=4, dataset = "c4", tokenizer=tokenizer)
+model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", quantization_config=quantization_config)
