@@ -133,4 +133,4 @@ def get_wikitext2(nsamples, seed, seqlen, model):
     return traindataset, testenc
 
 traindataset,testenc = get_wikitext2(128, 0, 2048, model_name)
-opt_eval(quantized_model.model, testenc, "cuda:0")
+opt_eval(quantized_model, testenc, "cuda:0")
