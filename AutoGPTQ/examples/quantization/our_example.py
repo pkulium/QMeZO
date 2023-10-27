@@ -185,7 +185,6 @@ def get_c4(nsamples, seed, seqlen, model):
 def main():
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_dir, use_fast=True)
     traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
-    traindataset,testenc = get_c4(128, 0, 2048, pretrained_model_dir)
 
     quantize_config = BaseQuantizeConfig(
         bits=2,  # quantize model to 4-bit

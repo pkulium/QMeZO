@@ -132,3 +132,6 @@ model_id = "facebook/opt-125m"
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 quantization_config = GPTQConfig(bits=4, dataset = "c4", tokenizer=tokenizer)
 model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", quantization_config=quantization_config)
+
+traindataset,testenc = get_wikitext2(128, 0, 2048, model_id)
+opt_eval(model.model, testenc, "cuda:0")
