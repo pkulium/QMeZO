@@ -44,6 +44,7 @@ class OurArguments(TrainingArguments):
     load_int8: bool = False # load model parameters as int8
     max_length: int = 2048 # max length the model can take
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
+    load_quantized_model = True
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
@@ -263,12 +264,39 @@ class Framework:
             #         max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
             #         load_in_8bit=self.args.load_int8,
             #     )
-            quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
-            from auto_gptq import AutoGPTQForCausalLM
-            model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
-            model.eval()
-            if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
-                add_mezo_parts(model)
+
+            if self.args.load_quantized_model:
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
+                from auto_gptq import AutoGPTQForCausalLM
+                model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
+                model.eval()
+                if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
+                    add_mezo_parts(model)
+            else:
+                # Auto device loading
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
+                torch_dtype = torch.float32
+                if self.args.load_float16:
+                    torch_dtype = torch.float16
+                elif self.args.load_bfloat16:
+                    torch_dtype = torch.bfloat16
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                    device_map='auto',
+                    torch_dtype=torch_dtype,
+                    max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
+                    load_in_8bit=self.args.load_int8,
+                )
+                state_dict = torch.load(quantized_model_dir)["model"]
+                model = model._load_state_dict_into_model(
+                    model,
+                    state_dict,
+                    quantized_model_dir
+                )[0]
+
+                # make sure token embedding weights are still tied if needed
+                model.tie_weights()
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
