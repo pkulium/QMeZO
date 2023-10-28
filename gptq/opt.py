@@ -16,8 +16,7 @@ def get_opt(model):
     torch.nn.init.uniform_ = skip
     torch.nn.init.normal_ = skip
     from transformers import OPTForCausalLM
-    free_in_GB = int(torch.cuda.mem_get_info()[0]/1024**3)
-    model = OPTForCausalLM.from_pretrained(model, torch_dtype='auto', max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},)
+    model = OPTForCausalLM.from_pretrained(model, torch_dtype='auto', low_cpu_mem_usage=True)
     model.seqlen = model.config.max_position_embeddings
     return model
 
