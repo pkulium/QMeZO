@@ -303,7 +303,6 @@ class Framework:
                 if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
                     add_mezo_parts(model)
             else:
-                
                 quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
                 model = load_quant3('facebook/opt-13b', quantized_model_dir)
 
