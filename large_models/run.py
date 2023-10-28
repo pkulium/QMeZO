@@ -280,24 +280,15 @@ class Framework:
                     torch_dtype = torch.float16
                 elif self.args.load_bfloat16:
                     torch_dtype = torch.bfloat16
-                model = AutoModelForCausalLM.from_pretrained(
-                    self.args.model_name,
-                    config=config,
-                    device_map='auto',
-                    torch_dtype=torch_dtype,
-                    max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
-                    load_in_8bit=self.args.load_int8,
-                )
                 state_dict = torch.load(quantized_model_dir)
-                model = model._load_state_dict_into_model(
-                    model,
-                    state_dict,
-                    quantized_model_dir
-                )[0]
-
-                # make sure token embedding weights are still tied if needed
-                model.tie_weights()
-
+                model = AutoModelForCausalLM.from_pretrained(
+                    None, 
+                    config=config, 
+                    device_map='auto', 
+                    torch_dtype=torch_dtype, 
+                    load_in_8bit=self.args.load_int8, 
+                    state_dict=state_dict)
+                
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
 
