@@ -44,7 +44,7 @@ class OurArguments(TrainingArguments):
     load_int8: bool = False # load model parameters as int8
     max_length: int = 2048 # max length the model can take
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
-    load_quantized_model = False
+    load_autogptq_model = False
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
@@ -217,6 +217,36 @@ def add_mezo_parts(model):
             module.use_cuda_fp16 = True
             module.autogptq_cuda_available = False
 
+from gptq.modelutils import find_layers
+from gptq.quant import make_quant3
+def load_quant3(model, checkpoint):
+    from transformers import OPTConfig, OPTForCausalLM 
+    config = OPTConfig.from_pretrained(model)
+    def noop(*args, **kwargs):
+        pass
+    torch.nn.init.kaiming_uniform_ = noop 
+    torch.nn.init.uniform_ = noop 
+    torch.nn.init.normal_ = noop 
+
+    torch.set_default_dtype(torch.half)
+    transformers.modeling_utils._init_weights = False
+    torch.set_default_dtype(torch.half)
+    model = OPTForCausalLM(config)
+    torch.set_default_dtype(torch.float)
+    model = model.eval()
+    layers = find_layers(model)
+    for name in ['model.decoder.project_out', 'model.decoder.project_in', 'lm_head']:
+        if name in layers:
+            del layers[name]
+    make_quant3(model, layers, faster=False)
+
+    print('Loading model ...')
+    model.load_state_dict(torch.load(checkpoint))
+    model.seqlen = model.config.max_position_embeddings
+    print('Done.')
+
+    return model
+
 class Framework:
 
     def __init__(self, args, task):
@@ -265,7 +295,7 @@ class Framework:
             #         load_in_8bit=self.args.load_int8,
             #     )
 
-            if self.args.load_quantized_model:
+            if self.args.load_autogptq_model:
                 quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
@@ -273,24 +303,10 @@ class Framework:
                 if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
                     add_mezo_parts(model)
             else:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
-                 # Auto device loading
-                torch_dtype = torch.float32
-                if self.args.load_float16:
-                    torch_dtype = torch.float16
-                elif self.args.load_bfloat16:
-                    torch_dtype = torch.bfloat16
-                model = AutoModelForCausalLM.from_pretrained(
-                    self.args.model_name,
-                    config=config,
-                    device_map='auto',
-                    torch_dtype=torch_dtype,
-                    max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
-                    load_in_8bit=self.args.load_int8,
-                )
-                state_dict = torch.load(quantized_model_dir)
-                model.load_state_dict(state_dict)
                 
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
+                model = load_quant3(self.args.model_name, quantized_model_dir)
+
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
 
