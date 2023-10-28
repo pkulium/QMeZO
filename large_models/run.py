@@ -273,16 +273,23 @@ class Framework:
                 if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
                     add_mezo_parts(model)
             else:
-                # Auto device loading
                 quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
+                 # Auto device loading
                 torch_dtype = torch.float32
                 if self.args.load_float16:
                     torch_dtype = torch.float16
                 elif self.args.load_bfloat16:
                     torch_dtype = torch.bfloat16
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                    device_map='auto',
+                    torch_dtype=torch_dtype,
+                    max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
+                    load_in_8bit=self.args.load_int8,
+                )
                 state_dict = torch.load(quantized_model_dir)
-                model = AutoModelForCausalLM.from_pretrained(None, config=config,  max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())}, state_dict=state_dict)
-
+                model.load_state_dict(state_dict)
                 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
