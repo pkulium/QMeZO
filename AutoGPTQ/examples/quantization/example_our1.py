@@ -12,4 +12,4 @@ quantization_config = GPTQConfig(
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 quant_model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=quantization_config, device_map='auto', low_cpu_mem_usage=True)
-quant_model.save_pretrained("opt-13b-gptq")
+quant_model.save_pretrained("opt-13b-gptq", safe_serialization=True)
