@@ -44,7 +44,7 @@ class OurArguments(TrainingArguments):
     load_int8: bool = False # load model parameters as int8
     max_length: int = 2048 # max length the model can take
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
-    load_quantized_model = True
+    load_quantized_model = False
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
