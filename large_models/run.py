@@ -281,13 +281,8 @@ class Framework:
                 elif self.args.load_bfloat16:
                     torch_dtype = torch.bfloat16
                 state_dict = torch.load(quantized_model_dir)
-                model = AutoModelForCausalLM.from_pretrained(
-                    None, 
-                    config=config, 
-                    device_map='auto', 
-                    torch_dtype=torch_dtype, 
-                    load_in_8bit=self.args.load_int8, 
-                    state_dict=state_dict)
+                model = AutoModelForCausalLM.from_pretrained(None, config=config, state_dict=state_dict)
+
                 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
