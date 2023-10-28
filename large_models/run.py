@@ -305,7 +305,7 @@ class Framework:
             else:
                 
                 quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
-                model = load_quant3(self.args.model_name, quantized_model_dir)
+                model = load_quant3('facebook/opt-13b', quantized_model_dir)
 
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
