@@ -217,8 +217,8 @@ def add_mezo_parts(model):
             module.use_cuda_fp16 = True
             module.autogptq_cuda_available = False
 
-from gptq.modelutils import find_layers
-from gptq.quant import make_quant3
+from modelutils import find_layers
+from quant import make_quant3
 def load_quant3(model, checkpoint):
     from transformers import OPTConfig, OPTForCausalLM 
     config = OPTConfig.from_pretrained(model)
