@@ -288,7 +288,7 @@ class Framework:
                     max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
                     load_in_8bit=self.args.load_int8,
                 )
-                state_dict = torch.load(quantized_model_dir)["model"]
+                state_dict = torch.load(quantized_model_dir)
                 model = model._load_state_dict_into_model(
                     model,
                     state_dict,
