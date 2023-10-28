@@ -281,7 +281,7 @@ class Framework:
                 elif self.args.load_bfloat16:
                     torch_dtype = torch.bfloat16
                 state_dict = torch.load(quantized_model_dir)
-                model = AutoModelForCausalLM.from_pretrained(None, config=config, state_dict=state_dict)
+                model = AutoModelForCausalLM.from_pretrained(None, config=config,  max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())}, state_dict=state_dict)
 
                 
         # Load tokenizer
