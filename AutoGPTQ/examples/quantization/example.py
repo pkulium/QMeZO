@@ -5,7 +5,7 @@ model_id = "facebook/opt-6.7b"
 
 quantization_config = GPTQConfig(
      bits=2,
-     group_size=128,
+     group_size=1024,
      dataset="c4",
      desc_act=False,
 )
