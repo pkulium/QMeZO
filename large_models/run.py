@@ -119,6 +119,29 @@ def set_seed(seed: int):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
+
+
+def clip_w(qweight, mezo, n_bit):
+    """
+    Clip the weights of mezo in place to ensure that 0 <= qweight + mezo.weight < 2 ** n_bit, without affecting gradients.
+
+    :param qweight: The original quantized weight (a PyTorch tensor)
+    :param mezo: The linear layer whose weights are to be clipped (a PyTorch nn.Module or nn.Parameter)
+    :param n_bit: The number of bits for the quantization
+    """
+    # Define the minimum and maximum values based on n_bit
+    min_val = 0
+    max_val = (2 ** n_bit) - 1
+
+    # Calculate the allowed range for mezo weights
+    mezo_min = min_val - qweight
+    mezo_max = max_val - qweight
+
+    # Clip mezo weights to the allowed range without affecting the gradient
+    with torch.no_grad():
+        mezo.weight.clamp_(mezo_min, mezo_max)
+
+
 def custom_forward(self, x):
         out_shape = x.shape[:-1] + (self.outfeatures,)
         x = x.reshape(-1, x.shape[-1])
@@ -189,6 +212,7 @@ def custom_forward(self, x):
                weight = weight.reshape(-1, self.group_size, weight.shape[2])
             else:
                raise NotImplementedError("Only 2,3,4,8 bits are supported.")
+            clip_w(weight, self.mezo_part, self.bits)
             weight = (scales * (weight + self.mezo_part.weight.reshape(weight.shape) - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
