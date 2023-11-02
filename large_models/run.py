@@ -189,10 +189,10 @@ def custom_forward(self, x):
                weight = weight.reshape(-1, self.group_size, weight.shape[2])
             else:
                raise NotImplementedError("Only 2,3,4,8 bits are supported.")
-            weight = (scales * (weight - zeros))
+            weight = (scales * (weight + self.mezo_part.weight.reshape(weight.shape) - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
-            weight += self.mezo_part.weight.reshape(weight.shape)
+            # weight += self.mezo_part.weight.reshape(weight.shape)
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
