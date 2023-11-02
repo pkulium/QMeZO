@@ -296,7 +296,8 @@ class Framework:
             #     )
 
             if self.args.load_autogptq_model:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
+                # quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/large_models/result/BoolQ-opt-13b-mezo-ft-20000-16-1e-7-1e-3-0'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
