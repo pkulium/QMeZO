@@ -139,7 +139,7 @@ def clip_w(qweight, mezo, n_bit):
 
     # Clip mezo weights to the allowed range without affecting the gradient
     with torch.no_grad():
-        mezo.weight.reshape(qweight.shape).clamp_(mezo_min, mezo_max)
+        mezo.weight.data.reshape(qweight.shape).clamp_(mezo_min, mezo_max)
 
 
 def custom_forward(self, x):
