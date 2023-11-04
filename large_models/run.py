@@ -212,7 +212,7 @@ def custom_forward(self, x):
                weight = weight.reshape(-1, self.group_size, weight.shape[2])
             else:
                raise NotImplementedError("Only 2,3,4,8 bits are supported.")
-            clip_w(weight, self.mezo_part, self.bits)
+            # clip_w(weight, self.mezo_part, self.bits)
             weight = (scales * (weight + self.mezo_part.weight.reshape(weight.shape) - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
