@@ -215,7 +215,7 @@ class OurTrainer(Trainer):
     from transformers.trainer_pt_utils import _get_learning_rate, log_metrics, metrics_format, save_metrics, save_state
 
     def _inner_training_loop(
-        self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
+        self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=['eval_loss']
     ):
         """
         We overload the original training loop to add linear probing and MeZO. Search key word "MeZO added"
