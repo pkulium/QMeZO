@@ -69,6 +69,7 @@ python -m pdb run.py \
     --load_best_model_at_end --evaluation_strategy steps --save_strategy steps --save_total_limit 1 \
     --eval_steps $EVAL_STEPS --save_steps $EVAL_STEPS \
     --train_as_classification \
+    --overwrite_output_dir \
     $EXTRA_ARGS \
     $TASK_ARGS \
     "$@"
