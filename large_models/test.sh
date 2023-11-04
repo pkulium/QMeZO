@@ -1,6 +1,6 @@
 git pull
 MODEL=facebook/opt-13b
-TASK=RTE 
+TASK=DROP
 MODE=ft 
 LR=1e-7 
 EPS=1e-3 
