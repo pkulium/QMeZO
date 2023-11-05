@@ -6,12 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# pretrained_model_dir = "facebook/opt-13b"
-# quantized_model_dir = "opt-13b-2bit-128g"
-
-
-pretrained_model_dir = "facebook/opt-1.3b"
-quantized_model_dir = "opt-1.3b-2bit-128g"
+pretrained_model_dir = "facebook/opt-13b"
+quantized_model_dir = "opt-13b-2bit-128g-tenary"
 
 # os.makedirs(quantized_model_dir, exist_ok=True)
 def get_wikitext2(nsamples, seed, seqlen, model):
@@ -134,76 +130,28 @@ def opt_eval(model, testenc, dev, seqlen = 2048):
 
     model.config.use_cache = use_cache
 
-def get_c4(nsamples, seed, seqlen, model):
-    from datasets import load_dataset
-    traindata = load_dataset(
-        'allenai/c4', 'allenai--c4', data_files={'train': 'en/c4-train.00000-of-01024.json.gz'}, split='train'
-    )
-    valdata = load_dataset(
-        'allenai/c4', 'allenai--c4', data_files={'validation': 'en/c4-validation.00000-of-00008.json.gz'}, split='validation'
-    )
-
-    from transformers import AutoTokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model, use_fast=False)
-
-    import random
-    random.seed(seed)
-    trainloader = []
-    for _ in range(nsamples):
-        while True:
-            i = random.randint(0, len(traindata) - 1)
-            trainenc = tokenizer(traindata[i]['text'], return_tensors='pt')
-            if trainenc.input_ids.shape[1] >= seqlen:
-                break
-        i = random.randint(0, trainenc.input_ids.shape[1] - seqlen - 1)
-        j = i + seqlen
-        inp = trainenc.input_ids[:, i:j]
-        tar = inp.clone()
-        tar[:, :-1] = -100
-        trainloader.append((inp, tar))
-
-    import random
-    random.seed(0)
-    valenc = []
-    for _ in range(256):
-        while True:
-            i = random.randint(0, len(valdata) - 1)
-            tmp = tokenizer(valdata[i]['text'], return_tensors='pt')
-            if tmp.input_ids.shape[1] >= seqlen:
-                break
-        i = random.randint(0, tmp.input_ids.shape[1] - seqlen - 1)
-        j = i + seqlen
-        valenc.append(tmp.input_ids[:, i:j])
-    valenc = torch.hstack(valenc)
-    class TokenizerWrapper:
-        def __init__(self, input_ids):
-            self.input_ids = input_ids
-    valenc = TokenizerWrapper(valenc)
-
-    return trainloader, valenc 
-
 def main():
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_dir, use_fast=True)
     traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
 
-    quantize_config = BaseQuantizeConfig(
-        bits=2,  # quantize model to 4-bit
-        group_size=128,  # it is recommended to set the value to 128
-        desc_act=False,  # desc_act and group size only works on triton   
-    )
+    # quantize_config = BaseQuantizeConfig(
+    #     bits=2,  # quantize model to 4-bit
+    #     group_size=8,  # it is recommended to set the value to 128
+    #     desc_act=False,  # desc_act and group size only works on triton
+    # )
 
     # load un-quantized model, the model will always be force loaded into cpu
-    model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
+    # model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
 
     # quantize model, the examples should be list of dict whose keys can only be "input_ids" and "attention_mask" 
     # with value under torch.LongTensor type.
-    model.quantize(traindataset, use_triton=False)
+    # model.quantize(traindataset, use_triton=False)
 
     # save quantized model
-    model.save_quantized(quantized_model_dir)
+    # model.save_quantized(quantized_model_dir)
 
     # save quantized model using ssafetensors
-    model.save_quantized(quantized_model_dir, use_safetensors=True)
+    # model.save_quantized(quantized_model_dir, use_safetensors=True)
 
     # load quantized model, currently only support cpu or single gpu
     model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
