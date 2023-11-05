@@ -71,6 +71,7 @@ python -m pdb run.py \
     --train_as_classification \
     --overwrite_output_dir \
     --save_model False \
+    --use_legacy_prediction_loop \
     $EXTRA_ARGS \
     $TASK_ARGS \
     "$@"
