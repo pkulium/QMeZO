@@ -184,7 +184,7 @@ def custom_forward(self, x):
                 else:
                     raise NotImplementedError("Only 2,3,4,8 bits are supported.")
         else:
-            if hasattr(self, 'wf') and self.wf.device != self.qzeros.device:
+            if self.wf.device != self.qzeros.device:
                self.wf = self.wf.to(self.qzeros.device)
                 
             if self.bits in [2,4,8]:
