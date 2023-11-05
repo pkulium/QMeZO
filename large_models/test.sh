@@ -70,7 +70,6 @@ python -m pdb run.py \
     --eval_steps $EVAL_STEPS --save_steps $EVAL_STEPS \
     --train_as_classification \
     --overwrite_output_dir \
-    --save_model False \
     $EXTRA_ARGS \
     $TASK_ARGS \
     "$@"
