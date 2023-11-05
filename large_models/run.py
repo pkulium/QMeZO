@@ -346,7 +346,7 @@ class Framework:
             #     )
 
             if self.args.load_autogptq_model:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-4bit-128g'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
@@ -589,7 +589,7 @@ class Framework:
 
         if self.args.label_names is None:
             self.args.label_names = ['labels']
-
+            
         trainer = OurTrainer(
             model=self.model, 
             args=self.args,
