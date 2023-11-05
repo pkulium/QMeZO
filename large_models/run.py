@@ -104,6 +104,9 @@ class OurArguments(TrainingArguments):
 
     # Auto saving when interrupted
     save_on_interrupt: bool = False # save model when interrupted (useful for long training)
+    
+    # add label_names to get loss
+    label_names = ['labels']
 
 
 def parse_args():
@@ -593,8 +596,6 @@ class Framework:
             train_dataset=train_dataset, 
             eval_dataset=eval_dataset,
             tokenizer=self.tokenizer,
-            # add label_names to get loss
-            label_names = ['labels'],
             data_collator=DataCollatorWithPaddingAndNesting(self.tokenizer, pad_to_multiple_of=8) if self.args.train_as_classification else collator(self.tokenizer, pad_to_multiple_of=8),
         )
         if self.args.save_on_interrupt:
