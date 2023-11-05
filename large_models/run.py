@@ -104,9 +104,6 @@ class OurArguments(TrainingArguments):
 
     # Auto saving when interrupted
     save_on_interrupt: bool = False # save model when interrupted (useful for long training)
-    
-    # add label_names to get loss
-    label_names = ['labels']
 
 
 def parse_args():
@@ -590,6 +587,8 @@ class Framework:
         else:
             collator = DataCollatorForTokenClassification
 
+        if self.args.label_names is None:
+            self.args.label_names = ['labels']
         trainer = OurTrainer(
             model=self.model, 
             args=self.args,
