@@ -228,7 +228,7 @@ def custom_forward(self, x):
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
             quantized_mezo_weight = quantize(self.mezo_part.weight, bits=8)        
-            weight += quantized_mezo_weight 
+            weight += quantized_mezo_weight.reshape(weight.shape)
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
