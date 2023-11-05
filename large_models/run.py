@@ -154,6 +154,20 @@ def quantize(tensor, bits):
 
 
 def custom_forward(self, x):
+        if not hasattr(self, 'wf'):
+            # is performed by unpacking the weights and using torch.matmul
+            if self.bits in [2, 4, 8]:
+                self.wf = torch.tensor(list(range(0, 32, self.bits)), dtype=torch.int32).unsqueeze(0)
+            elif self.bits == 3:
+                self.wf = torch.tensor(
+                    [
+                        [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0],
+                        [0, 1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31],
+                        [0, 2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 0],
+                    ],
+                    dtype=torch.int32
+                ).reshape(1, 3, 12)
+
         out_shape = x.shape[:-1] + (self.outfeatures,)
         x = x.reshape(-1, x.shape[-1])
         if self.autogptq_cuda_available is True and (
