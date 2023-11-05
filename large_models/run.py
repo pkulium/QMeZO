@@ -142,6 +142,16 @@ def clip_w(qweight, mezo, n_bit):
     with torch.no_grad():
         mezo.weight.data.reshape(qweight.shape).clamp_(mezo_min, mezo_max)
 
+def quantize(tensor, bits):
+    # Calculate the scale factor based on the number of bits
+    # For signed integers, we use 2^(bits-1) - 1 to get the maximum value
+    max_val = 2**(bits - 1) - 1
+    scale = tensor.abs().max() / max_val
+
+    # Quantize the tensor
+    quantized_tensor = torch.round(tensor / scale) * scale
+    return quantized_tensor
+
 
 def custom_forward(self, x):
         out_shape = x.shape[:-1] + (self.outfeatures,)
@@ -214,10 +224,11 @@ def custom_forward(self, x):
             else:
                raise NotImplementedError("Only 2,3,4,8 bits are supported.")
             # clip_w(weight, self.mezo_part, self.bits)
-            weight = (scales * (weight + self.mezo_part.weight.reshape(weight.shape) - zeros))
+            weight = (scales * (weight - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
-            # weight += self.mezo_part.weight.reshape(weight.shape)
+            quantized_mezo_weight = self.quantize(self.mezo_part.weight, bits=8)        
+            weight += quantized_mezo_weight 
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
