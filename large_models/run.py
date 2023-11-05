@@ -589,6 +589,7 @@ class Framework:
 
         if self.args.label_names is None:
             self.args.label_names = ['labels']
+            
         trainer = OurTrainer(
             model=self.model, 
             args=self.args,
