@@ -83,9 +83,10 @@ class OurArguments(TrainingArguments):
     eos_token: str = "\n" # end of sentence token
 
     # Saving
-    save_model: bool = True # whether to save the model
+    save_model: bool = False # whether to save the model
     no_eval: bool = False # whether to skip evaluation
     tag: str = "" # saving tag
+    save_model_mezo_part: bool = True
 
     # Linear probing
     linear_probing: bool = False # whether to do linear probing
@@ -591,6 +592,13 @@ class Framework:
         if self.args.save_model:
             logger.warn("Save model..")
             trainer.save_model()
+        
+        if self.args.save_model_mezo_part:
+            logger.warn("Save model mezo part..")
+            # Assuming 'model' is your PyTorch model
+            model_state_dict =trainer.model.state_dict()
+            mezo_layers = {name: param for name, param in model_state_dict.items() if 'mezo' in name}
+            torch.save(mezo_layers, f'{self.args.output_dir}/mezo_layers.pth')
         
         # FSDP compatibility
         self.model = trainer.model 
