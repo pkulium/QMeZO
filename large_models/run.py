@@ -613,7 +613,7 @@ class Framework:
             )
         if self.args.resume_from_checkpoint is not None:
             last_checkpoint = self.args.resume_from_checkpoint
-
+        torch.cuda.empty_cache()
         trainer.train(resume_from_checkpoint=last_checkpoint) 
 
         # Explicitly save the model
