@@ -1,6 +1,6 @@
 git pull
 MODEL=facebook/opt-13b
-TASK=MultiRC
+TASK=RTE
 MODE=ft 
 LR=1e-7 
 EPS=1e-3 
