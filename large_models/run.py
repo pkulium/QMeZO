@@ -241,7 +241,7 @@ def custom_forward(self, x):
             weight = (scales * (weight - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
-            quantized_mezo_weight = quantize(self.mezo_part.weight, bits=4)        
+            quantized_mezo_weight = quantize(self.mezo_part.weight, bits=2)        
             weight += quantized_mezo_weight.reshape(weight.shape)
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
@@ -346,7 +346,7 @@ class Framework:
             #     )
 
             if self.args.load_autogptq_model:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-32g'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
