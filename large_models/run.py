@@ -401,6 +401,8 @@ name_to_mezo_part = {}
 def add_mezo_parts(model):
     for name, module in model.named_modules():
         if 'mezo_part' in name:
+            if 'weight' in name:
+                name_to_mezo_part[name] = mezo_part
             continue
         if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
             print(f'name:{name} type:{type(module).__name__}')
@@ -410,7 +412,6 @@ def add_mezo_parts(model):
             mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
             mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
             mezo_part.weight_type = model.dtype
-            name_to_mezo_part[name] = mezo_part
             mezo_part.to(device=model.device, dtype=model.dtype)
             mezo_part.weight.requires_grad = True
             mezo_part.bias.requires_grad = True
