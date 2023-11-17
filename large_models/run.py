@@ -464,7 +464,7 @@ def reset_parameters(self):
             logging.info(f'Before:{self.lora_A}')
         # nn.init.normal_(self.lora_A)
         mean = 0.0  # Mean of the normal distribution
-        std = 1.0   # Standard deviation of the normal distribution
+        std = 0.01   # Standard deviation of the normal distribution
         # Initialize lora_A with normal distribution
         self.lora_A.data.normal_(mean, std)
         nn.init.zeros_(self.lora_B)
