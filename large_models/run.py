@@ -468,7 +468,10 @@ def reset_parameters(self):
         nn.init.zeros_(self.lora_B)
         if DEBUG:
             a = nn.init.normal_(lora_A)
-            lora_A += 1
+            mean = 0.0  # typically, the mean is 0 for Gaussian noise
+            std = 0.01  # standard deviation can be adjusted based on your needs
+            # Add Gaussian noise to lora_A
+            lora_A.data.normal_(mean, std)
             logging.info(f'After:{self.lora_A}')
             logging.info(f'After lora_A:{lora_A}')
 
