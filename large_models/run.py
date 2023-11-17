@@ -426,7 +426,7 @@ def add_mezo_parts(model):
                 name_to_mezo_part[name] = mezo_part
             continue
         if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
-            print(f'name:{name} type:{type(module).__name__}')
+            logger.info(f'Inject mezo to name:{name} type:{type(module).__name__}')
             mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
             torch.nn.init.zeros_(mezo_part.weight)
             torch.nn.init.zeros_(mezo_part.bias)
@@ -471,7 +471,7 @@ def add_mezo_lora_parts(model, r, alpha, float16):
     # Insert LoRA
     for key, _ in model.named_modules():
         if key[-len(attention_name):] == attention_name:
-            logger.info(f"Inject lora to: {key}")
+            logger.info(f"Inject mezo lora to: {key}")
             _, _, attn = find_module(model, key)
 
             if model.config.model_type == "opt":
@@ -505,36 +505,6 @@ def add_mezo_lora_parts(model, r, alpha, float16):
     for n, p in model.named_parameters():
         if "lora" not in n:
             p.requires_grad = False
-
-from modelutils import find_layers
-from quant import make_quant3
-def load_quant3(model, checkpoint):
-    from transformers import OPTConfig, OPTForCausalLM 
-    config = OPTConfig.from_pretrained(model)
-    def noop(*args, **kwargs):
-        pass
-    torch.nn.init.kaiming_uniform_ = noop 
-    torch.nn.init.uniform_ = noop 
-    torch.nn.init.normal_ = noop 
-
-    torch.set_default_dtype(torch.half)
-    transformers.modeling_utils._init_weights = False
-    torch.set_default_dtype(torch.half)
-    model = OPTForCausalLM(config)
-    torch.set_default_dtype(torch.float)
-    model = model.eval()
-    layers = find_layers(model)
-    for name in ['model.decoder.project_out', 'model.decoder.project_in', 'lm_head']:
-        if name in layers:
-            del layers[name]
-    make_quant3(model, layers, faster=False)
-
-    print('Loading model ...')
-    model.load_state_dict(torch.load(checkpoint))
-    model.seqlen = model.config.max_position_embeddings
-    print('Done.')
-
-    return model
 
 class Framework:
 
