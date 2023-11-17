@@ -461,19 +461,15 @@ def reset_parameters(self):
     if hasattr(self, 'lora_A'):
         # initialize A the same way as the default for nn.Linear and B to zero
         if DEBUG:
-            lora_A = nn.Parameter(self.bias.new_zeros((5, 5)))
-            logging.info(f'Before lora_A:{lora_A}')
             logging.info(f'Before:{self.lora_A}')
-        nn.init.normal_(self.lora_A)
+        # nn.init.normal_(self.lora_A)
+        mean = 0.0  # Mean of the normal distribution
+        std = 1.0   # Standard deviation of the normal distribution
+        # Initialize lora_A with normal distribution
+        self.lora_A.data.normal_(mean, std)
         nn.init.zeros_(self.lora_B)
         if DEBUG:
-            a = nn.init.normal_(lora_A)
-            mean = 0.0  # typically, the mean is 0 for Gaussian noise
-            std = 0.01  # standard deviation can be adjusted based on your needs
-            # Add Gaussian noise to lora_A
-            lora_A.data.normal_(mean, std)
             logging.info(f'After:{self.lora_A}')
-            logging.info(f'After lora_A:{lora_A}')
 
 def add_mezo_lora_parts(model, r, alpha, float16):
     if model.config.model_type == "opt":
