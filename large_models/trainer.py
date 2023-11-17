@@ -804,9 +804,8 @@ class OurTrainer(Trainer):
             else:
                 param.data = param.data - self._get_learning_rate() * (self.projected_grad * z)
             
-            if 'mezo_part' not in name or 'weight' not in name:
+            if name not in self.name_to_mezo_part:
                 continue
-
             with torch.no_grad():
                 quantizer = self.name_to_mezo_part[name].quantizer
                 qweight, absmax, _ = quantizer.quantize_block(param.data)
