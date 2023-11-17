@@ -477,7 +477,7 @@ def add_mezo_lora_parts(model, r, alpha, float16):
 
             if model.config.model_type == "opt":
                 original_q = attn.q_proj
-                device, dtype = original_q.weight.device, torch.float16 if float16 else torch.float32
+                device, dtype = original_q.weight.device, torch.float32
                 if r > 0:
                     original_q.lora_alpha = alpha
                     original_q.r = r
