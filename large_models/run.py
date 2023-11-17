@@ -468,7 +468,7 @@ def reset_parameters(self):
         nn.init.zeros_(self.lora_B)
         if DEBUG:
             a = nn.init.normal_(lora_A)
-            logging.info(f'a:{a}')        
+            lora_A += 1
             logging.info(f'After:{self.lora_A}')
             logging.info(f'After lora_A:{lora_A}')
 
