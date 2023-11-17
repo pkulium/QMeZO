@@ -407,14 +407,15 @@ def custom_forward(self, x):
             weight = (scales * (weight - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
-            if not hasattr(self, 'lora_A'):
+            if hasattr(self, 'mezo_part'):
                 weight += self.mezo_part.weight.reshape(weight.shape)
-            else:
+            elif hasattr(self, 'lora_A'):
                 weight += (self.lora_B @ self.lora_A).reshape(weight.shape)
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
-        out += self.mezo_part.bias
+        if hasattr(self, 'mezo_part'):    
+            out += self.mezo_part.bias
 
         return out
 
