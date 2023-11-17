@@ -477,14 +477,16 @@ def add_mezo_lora_parts(model, r, alpha, float16):
 
             if model.config.model_type == "opt":
                 original_q = attn.q_proj
-                device, dtype = original_q.weight.device, torch.float32
+                device, dtype = original_q.weight.device, torch.float16 if float16 else torch.float32
                 if r > 0:
                     original_q.lora_alpha = alpha
                     original_q.r = r
                     original_q.lora_A = nn.Parameter(torch.zeros((r, original_q.in_features), device=device, dtype=dtype))
                     original_q.lora_B = nn.Parameter(torch.zeros((original_q.out_features, r), device=device, dtype=dtype))
                     original_q.scaling = original_q.lora_alpha / original_q.r
-                    reset_parameters(original_q)
+                    nn.init.kaiming_uniform_(original_q.lora_A, a=math.sqrt(5))
+                    nn.init.kaiming_uniform_(original_q.lora_A, a=math.sqrt(5))
+                    # reset_parameters(original_q)
                 original_q.forward = custom_forward.__get__(original_q)
                 original_q.use_cuda_fp16 = True
                 original_q.autogptq_cuda_available = False
