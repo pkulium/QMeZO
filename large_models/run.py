@@ -476,11 +476,12 @@ def add_mezo_lora_parts(model, r, alpha, float16):
 
             if model.config.model_type == "opt":
                 original_q = attn.q_proj
+                device, dtype = original_q.weight.device, dtype=original_q.weight.dtype
                 if r > 0:
                     original_q.lora_alpha = alpha
                     original_q.r = r
-                    original_q.lora_A = nn.Parameter(torch.zeros((r, original_q.in_features), device=original_q.device, dtype=original_q.dtype))
-                    original_q.lora_B = nn.Parameter(torch.zeros((original_q.out_features, r), device=original_q.device, dtype=original_q.dtype))
+                    original_q.lora_A = nn.Parameter(torch.zeros((r, original_q.in_features), device=device, dtype=dtype))
+                    original_q.lora_B = nn.Parameter(torch.zeros((original_q.out_features, r), device=device, dtype=dtype))
                     original_q.scaling = original_q.lora_alpha / original_q.r
                     reset_parameters(original_q)
                 original_q.forward = custom_forward.__get__(original_q)
@@ -491,8 +492,8 @@ def add_mezo_lora_parts(model, r, alpha, float16):
                 if r > 0:
                     original_v.lora_alpha = alpha
                     original_v.r = r
-                    original_v.lora_A = nn.Parameter(torch.zeros((r, original_v.in_features), device=original_v.device, dtype=original_v.dtype))
-                    original_v.lora_B = nn.Parameter(torch.zeros((original_v.out_features, r), device=original_v.device, dtype=original_v.dtype))
+                    original_v.lora_A = nn.Parameter(torch.zeros((r, original_v.in_features), device=device, dtype=dtype))
+                    original_v.lora_B = nn.Parameter(torch.zeros((original_v.out_features, r), device=device, dtype=dtype))
                     original_v.scaling = original_v.lora_alpha / original_v.r
                     reset_parameters(original_v)
                 original_v.forward = custom_forward.__get__(original_v)
