@@ -45,6 +45,7 @@ class OurArguments(TrainingArguments):
     max_length: int = 2048 # max length the model can take
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
     load_autogptq_model = True
+    quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-1.3b-2bit-128g'
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
@@ -406,9 +407,10 @@ def custom_forward(self, x):
             weight = (scales * (weight - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
-            # quantized_mezo_weight = quantize(self.mezo_part.weight, bits=2)        
-            # weight += quantized_mezo_weight.reshape(weight.shape)
-            weight += self.mezo_part.weight.reshape(weight.shape)
+            if not hasattr(self, 'lora_A'):
+                weight += self.mezo_part.weight.reshape(weight.shape)
+            else:
+                weight += (self.lora_B @ self.lora_A).reshape(weight.shape)
             out = torch.matmul(x.half(), weight)
         out = out.half().reshape(out_shape)
         out = out + self.bias if self.bias is not None else out
@@ -438,6 +440,71 @@ def add_mezo_parts(model):
             module.forward = custom_forward.__get__(module)
             module.use_cuda_fp16 = True
             module.autogptq_cuda_available = False
+        
+
+def find_module(root_module: nn.Module, key: str):
+    """
+    Find a module with a specific name in a Transformer model
+    From OpenDelta https://github.com/thunlp/OpenDelta
+    """
+    sub_keys = key.split(".")
+    parent_module = root_module
+    for sub_key in sub_keys[:-1]:
+        parent_module = getattr(parent_module, sub_key)
+    module = getattr(parent_module, sub_keys[-1])
+    return parent_module, sub_keys[-1], module
+
+def reset_parameters(self):
+    if hasattr(self, 'lora_A'):
+        # initialize A the same way as the default for nn.Linear and B to zero
+        nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
+        nn.init.zeros_(self.lora_B)
+
+def add_mezo_lora_parts(model, r, alpha, float16):
+    if model.config.model_type == "opt":
+        attention_name = "attn"
+    elif model.config.model_type == "roberta":
+        attention_name = "attention"
+    else:
+        raise NotImplementedError
+
+    # Insert LoRA
+    for key, _ in model.named_modules():
+        if key[-len(attention_name):] == attention_name:
+            logger.info(f"Inject lora to: {key}")
+            _, _, attn = find_module(model, key)
+
+            if model.config.model_type == "opt":
+                original_q = attn.q_proj
+                if r > 0:
+                    original_q.lora_alpha = alpha
+                    original_q.r = r
+                    original_q.lora_A = nn.Parameter(original_q.weight.new_zeros((r, original_q.in_features)))
+                    original_q.lora_B = nn.Parameter(original_q.weight.new_zeros((original_q.out_features, r)))
+                    original_q.scaling = original_q.lora_alpha / original_q.r
+                    reset_parameters(original_q)
+                original_q.forward = custom_forward.__get__(original_q)
+                original_q.use_cuda_fp16 = True
+                original_q.autogptq_cuda_available = False
+                
+                original_v = attn.v_proj
+                if r > 0:
+                    original_v.lora_alpha = alpha
+                    original_v.r = r
+                    original_v.lora_A = nn.Parameter(original_v.weight.new_zeros((r, original_v.in_features)))
+                    original_v.lora_B = nn.Parameter(original_v.weight.new_zeros((original_v.out_features, r)))
+                    original_v.scaling = original_v.lora_alpha / original_v.r
+                    reset_parameters(original_v)
+                original_v.forward = custom_forward.__get__(original_v)
+                original_v.use_cuda_fp16 = True
+                original_v.autogptq_cuda_available = False
+            else:
+                raise NotImplementedError
+    
+    # Freeze non-LoRA parameters
+    for n, p in model.named_parameters():
+        if "lora" not in n:
+            p.requires_grad = False
 
 from modelutils import find_layers
 from quant import make_quant3
@@ -488,36 +555,20 @@ class Framework:
                 # Untie embeddings/LM head
                 logger.warn("Untie embeddings and LM head")
                 config.tie_word_embeddings = False
-            # if self.args.head_tuning:
-            #     # Head tuning
-            #     from ht_opt import OPTForCausalLM
-            #     model = OPTForCausalLM.from_pretrained(
-            #         self.args.model_name,
-            #         config=config,
-            #     )
-            # elif self.args.no_auto_device:
-            #     # No auto device (use for FSDP)
-            #     model = AutoModelForCausalLM.from_pretrained(
-            #         self.args.model_name,
-            #         config=config,
-            #     )
-            # else:
-            #     # Auto device loading
-            #     torch_dtype = torch.float32
-            #     if self.args.load_float16:
-            #         torch_dtype = torch.float16
-            #     elif self.args.load_bfloat16:
-            #         torch_dtype = torch.bfloat16
-            #     model = AutoModelForCausalLM.from_pretrained(
-            #         self.args.model_name,
-            #         config=config,
-            #         device_map='auto',
-            #         torch_dtype=torch_dtype,
-            #         max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
-            #         load_in_8bit=self.args.load_int8,
-            #     )
-
-            if self.args.load_autogptq_model:
+            if self.args.head_tuning:
+                # Head tuning
+                from ht_opt import OPTForCausalLM
+                model = OPTForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                )
+            elif self.args.no_auto_device:
+                # No auto device (use for FSDP)
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                )
+            elif self.args.quantized_model_dir:
                 quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-1.3b-2bit-128g'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
@@ -525,9 +576,21 @@ class Framework:
                 if (self.args.train_set_seed is not None or self.args.num_train_sets is not None) and not self.args.lora:
                     add_mezo_parts(model)
             else:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
-                model = load_quant3('facebook/opt-13b', quantized_model_dir)
-
+                # Auto device loading
+                torch_dtype = torch.float32
+                if self.args.load_float16:
+                    torch_dtype = torch.float16
+                elif self.args.load_bfloat16:
+                    torch_dtype = torch.bfloat16
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                    device_map='auto',
+                    torch_dtype=torch_dtype,
+                    max_memory={i: f'{free_in_GB-5}GB' for i in range(torch.cuda.device_count())},
+                    load_in_8bit=self.args.load_int8,
+                )
+                
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(self.args.model_name, use_fast=False)
 
@@ -540,8 +603,11 @@ class Framework:
             from prefix import PrefixTuning
             PrefixTuning(model, num_prefix=self.args.num_prefix, reparam=not self.args.no_reparam, float16=self.args.load_float16, init_by_real_act=self.args.prefix_init_by_real_act)
         if self.args.lora:
-            from lora import LoRA
-            LoRA(model, r=self.args.lora_r, alpha=self.args.lora_alpha, float16=self.args.load_float16)
+            if not self.args.quantized_model_dir:
+                from lora import LoRA
+                LoRA(model, r=self.args.lora_r, alpha=self.args.lora_alpha, float16=self.args.load_float16)
+            else:
+                add_mezo_lora_parts(model, r=self.args.lora_r, alpha=self.args.lora_alpha, float16=self.args.load_float16)
 
         if self.args.head_tuning:
             if model.config.model_type == "opt":
