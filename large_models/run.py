@@ -522,7 +522,7 @@ class Framework:
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
-                if self.args.train_set_seed is not None or self.args.num_train_sets is not None:
+                if (self.args.train_set_seed is not None or self.args.num_train_sets is not None) and not self.args.lora:
                     add_mezo_parts(model)
             else:
                 quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/gptq/opt13-2bit.pt'
