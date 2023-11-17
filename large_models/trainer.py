@@ -783,7 +783,7 @@ class OurTrainer(Trainer):
 
         # Reset model back to its parameters at start of step
         self.zo_perturb_parameters(scaling_factor=1)
-        
+
         return loss1
 
 
@@ -803,7 +803,13 @@ class OurTrainer(Trainer):
                 param.data = param.data - self._get_learning_rate() * (self.projected_grad * z + args.weight_decay * param.data)
             else:
                 param.data = param.data - self._get_learning_rate() * (self.projected_grad * z)
+            
+            if 'mezo_part' not in name:
+                continue
 
+            with torch.no_grad():
+                qweight, absmax, _ = self.quantizer.quantize_block(param.data)
+                param.data = self.quantizer.dequantize_block(qweight, absmax, self.weight_size)
         self.lr_scheduler.step()
 
 
