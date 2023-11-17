@@ -152,7 +152,6 @@ from transformers.utils import (
     logging,
 )
 from transformers.utils.generic import ContextManagers
-from run import custom_dequantize, custom_quantize
 
 _is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
 
@@ -208,6 +207,24 @@ TRAINER_STATE_NAME = "trainer_state.json"
 OPTIMIZER_NAME = "optimizer.pt"
 SCHEDULER_NAME = "scheduler.pt"
 SCALER_NAME = "scaler.pt"
+
+def custom_quantize(tensor, n_bits):
+    # Determine the range for n-bit representation
+    range_max = 2 ** n_bits - 1
+
+    # Normalize tensor to 0 to range_max
+    min_val, max_val = tensor.min(), tensor.max()
+    normalized_tensor = (tensor - min_val) / (max_val - min_val) * range_max
+
+    # Quantize to n-bit values
+    quantized_tensor = torch.round(normalized_tensor).int()
+    return quantized_tensor, min_val, max_val
+
+def custom_dequantize(quantized_tensor, min_val, max_val, n_bits):
+    # Dequantize back to float
+    range_max = 2 ** n_bits - 1
+    dequantized_tensor = quantized_tensor.float() / range_max * (max_val - min_val) + min_val
+    return dequantized_tensor
 
 
 class OurTrainer(Trainer):
