@@ -486,7 +486,7 @@ def add_mezo_lora_parts(model, r, alpha, float16):
                     original_q.lora_B = nn.Parameter(torch.zeros((original_q.out_features, r), device=device, dtype=dtype))
                     original_q.scaling = original_q.lora_alpha / original_q.r
                     nn.init.kaiming_uniform_(original_q.lora_A, a=math.sqrt(5))
-                    nn.init.kaiming_uniform_(original_q.lora_A, a=math.sqrt(5))
+                    nn.init.kaiming_uniform_(original_q.lora_B, a=math.sqrt(5))
                     # reset_parameters(original_q)
                 original_q.forward = custom_forward.__get__(original_q)
                 original_q.use_cuda_fp16 = True
