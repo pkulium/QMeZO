@@ -462,14 +462,14 @@ def reset_parameters(self):
         # initialize A the same way as the default for nn.Linear and B to zero
         if DEBUG:
             lora_A = nn.Parameter(self.bias.new_zeros((5, 5)))
-            logging.info(f'Before:{lora_A}')
+            logging.info(f'Before lora_A:{lora_A}')
             logging.info(f'Before:{self.lora_A}')
         nn.init.normal_(self.lora_A)
         nn.init.zeros_(self.lora_B)
         if DEBUG:
             nn.init.normal_(lora_A)
             logging.info(f'After:{self.lora_A}')
-            logging.info(f'After:{lora_A}')
+            logging.info(f'After lora_A:{lora_A}')
 
 def add_mezo_lora_parts(model, r, alpha, float16):
     if model.config.model_type == "opt":
