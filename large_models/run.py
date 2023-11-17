@@ -152,6 +152,26 @@ def quantize(tensor, bits):
     quantized_tensor = torch.round(tensor / scale) * scale
     return quantized_tensor
 
+import torch
+
+def custom_quantize(tensor, n_bits):
+    # Determine the range for n-bit representation
+    range_max = 2 ** n_bits - 1
+
+    # Normalize tensor to 0 to range_max
+    min_val, max_val = tensor.min(), tensor.max()
+    normalized_tensor = (tensor - min_val) / (max_val - min_val) * range_max
+
+    # Quantize to n-bit values
+    quantized_tensor = torch.round(normalized_tensor).int()
+    return quantized_tensor, min_val, max_val
+
+def custom_dequantize(quantized_tensor, min_val, max_val, n_bits):
+    # Dequantize back to float
+    range_max = 2 ** n_bits - 1
+    dequantized_tensor = quantized_tensor.float() / range_max * (max_val - min_val) + min_val
+    return dequantized_tensor
+
 import os
 import torch
 from torch import Tensor
@@ -409,9 +429,9 @@ def add_mezo_parts(model):
             mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
             torch.nn.init.zeros_(mezo_part.weight)
             torch.nn.init.zeros_(mezo_part.bias)
-            mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
-            mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
-            mezo_part.weight_type = model.dtype
+            # mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
+            # mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
+            # mezo_part.weight_type = model.dtype
             mezo_part.to(device=model.device, dtype=model.dtype)
             mezo_part.weight.requires_grad = True
             mezo_part.bias.requires_grad = True
