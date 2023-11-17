@@ -226,6 +226,16 @@ def custom_dequantize(quantized_tensor, min_val, max_val, n_bits):
     dequantized_tensor = quantized_tensor.float() / range_max * (max_val - min_val) + min_val
     return dequantized_tensor
 
+def quantize(tensor, bits):
+    # Calculate the scale factor based on the number of bits
+    # For signed integers, we use 2^(bits-1) - 1 to get the maximum value
+    max_val = 2**(bits - 1) - 1
+    scale = tensor.abs().max() / max_val
+
+    # Quantize the tensor
+    quantized_tensor = torch.round(tensor / scale) * scale
+    return quantized_tensor
+
 
 class OurTrainer(Trainer):
 
@@ -828,8 +838,9 @@ class OurTrainer(Trainer):
                 # qweight, absmax, _ = quantizer.quantize_block(param.data)
                 # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
                 n_bits = 2
-                quantized_tensor, min_val, max_val = custom_quantize(param.data, n_bits)
-                param.data = custom_dequantize(quantized_tensor, min_val, max_val, n_bits)
+                # quantized_tensor, min_val, max_val = custom_quantize(param.data, n_bits)
+                # param.data = custom_dequantize(quantized_tensor, min_val, max_val, n_bits)
+                param.data = custom_dequantize(param.data, n_bits)
         self.lr_scheduler.step()
 
 
