@@ -397,6 +397,7 @@ def custom_forward(self, x):
 
         return out
 
+name_to_mezo_part = {}
 def add_mezo_parts(model):
     for name, module in model.named_modules():
         if 'mezo_part' in name:
@@ -409,6 +410,7 @@ def add_mezo_parts(model):
             mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
             mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
             mezo_part.weight_type = model.dtype
+            name_to_mezo_part[name] = mezo_part
             mezo_part.to(device=model.device, dtype=model.dtype)
             mezo_part.weight.requires_grad = True
             mezo_part.bias.requires_grad = True
@@ -496,7 +498,7 @@ class Framework:
             #     )
 
             if self.args.load_autogptq_model:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-32g'
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-128g'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
@@ -748,6 +750,7 @@ class Framework:
             tokenizer=self.tokenizer,
             data_collator=DataCollatorWithPaddingAndNesting(self.tokenizer, pad_to_multiple_of=8) if self.args.train_as_classification else collator(self.tokenizer, pad_to_multiple_of=8),
         )
+        trainer.name_to_mezo_part = name_to_mezo_part
         if self.args.save_on_interrupt:
             trainer.add_callback(SIGUSR1Callback())
 
