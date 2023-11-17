@@ -459,7 +459,7 @@ def find_module(root_module: nn.Module, key: str):
 def reset_parameters(self):
     if hasattr(self, 'lora_A'):
         # initialize A the same way as the default for nn.Linear and B to zero
-        nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
+        nn.init.normal_(self.lora_A)
         nn.init.zeros_(self.lora_B)
 
 def add_mezo_lora_parts(model, r, alpha, float16):
@@ -485,9 +485,7 @@ def add_mezo_lora_parts(model, r, alpha, float16):
                     original_q.lora_A = nn.Parameter(torch.zeros((r, original_q.in_features), device=device, dtype=dtype))
                     original_q.lora_B = nn.Parameter(torch.zeros((original_q.out_features, r), device=device, dtype=dtype))
                     original_q.scaling = original_q.lora_alpha / original_q.r
-                    nn.init.kaiming_uniform_(original_q.lora_A, a=math.sqrt(5))
-                    nn.init.kaiming_uniform_(original_q.lora_B, a=math.sqrt(5))
-                    # reset_parameters(original_q)
+                    reset_parameters(original_q)
                 original_q.forward = custom_forward.__get__(original_q)
                 original_q.use_cuda_fp16 = True
                 original_q.autogptq_cuda_available = False
