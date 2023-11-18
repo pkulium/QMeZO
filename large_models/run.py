@@ -471,7 +471,33 @@ def reset_parameters(self):
         if DEBUG:
             logging.info(f'After:{self.lora_A}')
 
+
 def add_mezo_lora_parts(model, r, alpha, float16):
+    for name, module in model.named_modules():
+        if 'lora' in name:
+            continue
+        if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
+            logger.info(f'Inject mezo lora to name:{name} type:{type(module).__name__}')
+            device, dtype = module.weight.device, torch.float16 if float16 else torch.float32
+            if r > 0:
+                module.lora_alpha = alpha
+                module.r = r
+                # module.lora_A = nn.Parameter(torch.zeros((r, module.in_features), device=device, dtype=dtype))
+                # module.lora_B = nn.Parameter(torch.zeros((module.out_features, r), device=device, dtype=dtype))
+                module.lora_A = nn.Parameter(module.bias.new_zeros((r, module.in_features)))
+                module.lora_B = nn.Parameter(module.bias.new_zeros((module.out_features, r)))
+                module.scaling = module.lora_alpha / module.r
+                reset_parameters(module)
+            module.forward = custom_forward.__get__(module)
+            module.use_cuda_fp16 = True
+            module.autogptq_cuda_available = False
+
+    # Freeze non-LoRA parameters
+    for n, p in model.named_parameters():
+        if "lora" not in n:
+            p.requires_grad = False
+
+def add_mezo_lora_parts_old(model, r, alpha, float16):
     if model.config.model_type == "opt":
         attention_name = "attn"
     elif model.config.model_type == "roberta":
