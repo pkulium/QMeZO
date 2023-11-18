@@ -24,7 +24,7 @@ from utils import *
 from trainer import OurTrainer
 import random
 
-DEBUG = True
+DEBUG = False
 @dataclass
 class OurArguments(TrainingArguments):
     # dataset and sampling strategy
