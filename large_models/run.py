@@ -553,7 +553,7 @@ class Framework:
                     config=config,
                 )
             elif self.args.quantized_model_dir:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-1.3b-2bit-128g'
+                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-32g'
                 from auto_gptq import AutoGPTQForCausalLM
                 model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
