@@ -24,7 +24,7 @@ from utils import *
 from trainer import OurTrainer
 import random
 
-DEBUG = False
+DEBUG = True
 @dataclass
 class OurArguments(TrainingArguments):
     # dataset and sampling strategy
@@ -462,6 +462,7 @@ def reset_parameters(self):
         # initialize A the same way as the default for nn.Linear and B to zero
         if DEBUG:
             logging.info(f'Before:{self.lora_A}')
+            logging.info(f'Before:{self.lora_B}')
         # nn.init.normal_(self.lora_A)
         mean = 0.0  # Mean of the normal distribution
         std = 0.01   # Standard deviation of the normal distribution
@@ -470,6 +471,7 @@ def reset_parameters(self):
         nn.init.zeros_(self.lora_B)
         if DEBUG:
             logging.info(f'After:{self.lora_A}')
+            logging.info(f'After:{self.lora_B}')
 
 
 def add_mezo_lora_parts(model, r, alpha, float16):
