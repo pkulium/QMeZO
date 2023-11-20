@@ -478,7 +478,8 @@ def add_mezo_lora_parts(model, r, alpha, float16):
     for name, module in model.named_modules():
         if 'lora' in name:
             continue
-        if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
+        # if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
+        if 'q_proj' in name or 'v_proj' in name:
             logger.info(f'Inject mezo lora to name:{name} type:{type(module).__name__}')
             device, dtype = module.weight.device, torch.float16 if float16 else torch.float32
             if r > 0:
