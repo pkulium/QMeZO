@@ -426,7 +426,7 @@ def add_mezo_parts(model):
     for name, module in model.named_modules():
         if 'mezo_part' in name:
             if 'weight' in name:
-                name_to_mezo_part[name] = mezo_part
+                name_to_mezo_part[name] = 1
             continue
         if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
             logger.info(f'Inject mezo to name:{name} type:{type(module).__name__}')
