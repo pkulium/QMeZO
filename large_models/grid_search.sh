@@ -9,6 +9,6 @@ for lr in "${learning_rates[@]}"; do
     for eps in "${epsilons[@]}"; do
         echo "Running with LR=$lr and EPS=$eps"
         # Run your script here, passing in LR and EPS
-        ./test.sh $lr $eps
+        sh test.sh $lr $eps
     done
 done
