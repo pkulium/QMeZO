@@ -2,7 +2,7 @@ git pull
 MODEL=facebook/opt-13b
 TASK=ReCoRD
 MODE=ft 
-LR=1e-5
+LR=5e-6
 EPS=1e-3 
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
