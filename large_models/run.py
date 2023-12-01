@@ -85,7 +85,7 @@ class OurArguments(TrainingArguments):
     eos_token: str = "\n" # end of sentence token
 
     # Saving
-    save_model: bool = True # whether to save the model
+    save_model: bool = False # whether to save the model
     no_eval: bool = False # whether to skip evaluation
     tag: str = "" # saving tag
     save_model_mezo_part: bool = False
