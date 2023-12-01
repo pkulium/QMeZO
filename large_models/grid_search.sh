@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define arrays of values to try
-learning_rates=(1e-6 1e-7 4e-7 8e-7)
-epsilons=(1e-3 2e-3 1e-4 5e-4)
+learning_rates=(1e-6 2e-6)
+epsilons=(1e-3 2e-3)
 
 # Loop over all combinations
 for lr in "${learning_rates[@]}"; do
