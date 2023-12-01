@@ -1,8 +1,8 @@
 git pull
 MODEL=facebook/opt-13b
-TASK=DROP
+TASK=ReCoRD
 MODE=ft 
-LR=1e-7 
+LR=1e-6
 EPS=1e-3 
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
@@ -14,10 +14,10 @@ LR=${LR:-1e-7}
 EPS=${EPS:-1e-3}
 SEED=${SEED:-0}
 TRAIN=${TRAIN:-1000}
-DEV=${DEV:-2}
-EVAL=${EVAL:-2}
-STEPS=${STEPS:-21}
-EVAL_STEPS=${EVAL_STEPS:-2}
+DEV=${DEV:-500}
+EVAL=${EVAL:-10}
+STEPS=${STEPS:-20}
+EVAL_STEPS=${EVAL_STEPS:-4}
 
 MODE=${MODE:-ft}
 EXTRA_ARGS=""
@@ -59,7 +59,7 @@ echo "TRAIN/EVAL STEPS: $STEPS/$EVAL_STEPS"
 echo "MODE: $MODE"
 echo "Extra args: $EXTRA_ARGS $TASK_ARGS"
 
-python -m pdb run.py \
+python run.py \
     --model_name $MODEL \
     --task_name $TASK \
     --output_dir result/$TASK-${MODEL_NAME}-$TAG --tag $TAG --train_set_seed $SEED --num_train $TRAIN --num_dev $DEV --num_eval $EVAL --logging_steps 10 \
@@ -69,8 +69,6 @@ python -m pdb run.py \
     --load_best_model_at_end --evaluation_strategy steps --save_strategy steps --save_total_limit 1 \
     --eval_steps $EVAL_STEPS --save_steps $EVAL_STEPS \
     --train_as_classification \
-    --overwrite_output_dir \
-    --save_model False \
     $EXTRA_ARGS \
     $TASK_ARGS \
     "$@"
