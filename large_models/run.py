@@ -444,7 +444,7 @@ def add_mezo_parts(model):
             # initialse mezo part as zeros
             torch.nn.init.zeros_(mezo_part.weight)
             torch.nn.init.zeros_(mezo_part.bias)
-            mezo_part.original_layer_weight_dir = original_weight_dir + name + '.pt'
+            module.original_layer_weight_dir = original_weight_dir + name + '.pt'
             # use NFQuantizer
             # mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
             # mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
