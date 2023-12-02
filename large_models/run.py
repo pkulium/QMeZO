@@ -588,6 +588,12 @@ class Framework:
                 model.eval()
                 if (self.args.train_set_seed is not None or self.args.num_train_sets is not None) and not self.args.lora:
                     add_mezo_parts(model)
+                
+                origin_model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    config=config,
+                )
+                origin_model.eval()
             else:
                 # Auto device loading
                 torch_dtype = torch.float32
