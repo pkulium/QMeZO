@@ -413,14 +413,16 @@ def custom_forward(self, x):
             if self.original_layer_weight_dir:
                 layer_state_dict = torch.load(self.original_layer_weight_dir)
                 self.original_layer_weight_dir = None
-                # Print mezo_part weights before modification
-                print("mezo_part weights before modification:")
-                print(self.mezo_part.weight.data)
+                if DEBUG:
+                    # Print mezo_part weights before modification
+                    print("mezo_part weights before modification:")
+                    print(self.mezo_part.weight.data)
                 with torch.no_grad():
                     self.mezo_part.weight.data = layer_state_dict['weight'].data - weight.data.reshape(self.mezo_part.weight.shape)
                 del layer_state_dict
-                print("mezo_part weights after modification:")
-                print(self.mezo_part.weight.data)
+                if DEBUG:
+                    print("mezo_part weights after modification:")
+                    print(self.mezo_part.weight.data)
 
             if hasattr(self, 'mezo_part'):
                 weight += self.mezo_part.weight.reshape(weight.shape)
