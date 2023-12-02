@@ -6,6 +6,10 @@ import torch
 from transformers import AutoModelForCausalLM
 import os
 
+name = '2'
+original_layer_weight = name[12:] + '.pt'
+
+
 def save_layer(layer, layer_name, save_dir):
     """ Save the individual layer to disk """
     if not os.path.exists(save_dir):
