@@ -47,7 +47,6 @@ class OurArguments(TrainingArguments):
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
     load_autogptq_model = True
     quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-1.3b-2bit-128g'
-    init_mezo_zero = False
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
@@ -410,6 +409,13 @@ def custom_forward(self, x):
             weight = (scales * (weight - zeros))
             weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
 
+            # intialise mezo part as original weight - quantized weight
+            if self.original_layer_weight_dir:
+                layer_state_dict = torch.load(self.original_layer_weight_dir)
+                self.original_layer_weight_dir = None
+                with torch.no_grad():
+                    self.mezo_part.weight.data = layer_state_dict['weight'] - weight.data
+                    
             if hasattr(self, 'mezo_part'):
                 weight += self.mezo_part.weight.reshape(weight.shape)
             elif hasattr(self, 'lora_A'):
@@ -425,6 +431,7 @@ def custom_forward(self, x):
 
 name_to_mezo_part = {}
 def add_mezo_parts(model):
+    original_weight_dir = "/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-layers"
     for name, module in model.named_modules():
         if 'mezo_part' in name:
             if 'weight' in name:
@@ -436,6 +443,7 @@ def add_mezo_parts(model):
             # initialse mezo part as zeros
             torch.nn.init.zeros_(mezo_part.weight)
             torch.nn.init.zeros_(mezo_part.bias)
+            mezo_part.original_layer_weight_dir = original_weight_dir + name + '.pt'
             # use NFQuantizer
             # mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
             # mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
