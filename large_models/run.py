@@ -449,12 +449,9 @@ def add_mezo_parts(model):
             logger.info(f'Inject mezo to name:{name} type:{type(module).__name__}')
             mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
             # initialse mezo part as zeros
-            # torch.nn.init.zeros_(mezo_part.weight)
-            # torch.nn.init.zeros_(mezo_part.bias)
+            torch.nn.init.zeros_(mezo_part.weight)
+            torch.nn.init.zeros_(mezo_part.bias)
             # module.original_layer_weight_dir = original_weight_dir + name + '.pt'
-
-            # initialse mezo part using xavier
-            torch.nn.init.xavier_uniform_(mezo_part.weight)
             module.original_layer_weight_dir = None
 
             # use NFQuantizer
