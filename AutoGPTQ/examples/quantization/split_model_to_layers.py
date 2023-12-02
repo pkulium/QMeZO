@@ -33,7 +33,14 @@ save_dir = "/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization
 
 # Load the original model
 config = AutoConfig.from_pretrained(model_name)
-original_model = AutoModelForCausalLM.from_pretrained(model_name)
+ # Auto device loading
+torch_dtype = torch.float16
+original_model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    config=config,
+    device_map='auto',
+    torch_dtype=torch_dtype,
+)
 print('begin to save')
 # Modify and save parts of the model
 modify_and_save_model(original_model, save_dir)
