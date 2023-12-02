@@ -1,6 +1,6 @@
 git pull
 MODEL=facebook/opt-13b
-TASK=ReCoRD
+TASK=CB
 MODE=ft 
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
