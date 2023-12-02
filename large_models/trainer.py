@@ -828,14 +828,14 @@ class OurTrainer(Trainer):
             else:
                 param.data = param.data - self._get_learning_rate() * (self.projected_grad * z)
             
-            if name in self.name_to_mezo_part:
-                with torch.no_grad():
-                    # quantizer = self.name_to_mezo_part[name].quantizer
-                    # qweight, absmax, _ = quantizer.quantize_block(param.data)
-                    # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
-                    # quantized_tensor, min_val, max_val = custom_quantize(param.data, n_bits)
-                    # param.data = custom_dequantize(quantized_tensor, min_val, max_val, n_bits)
-                    param.data = quantize_nbit(param.data, n_bits = 4)
+            # if name in self.name_to_mezo_part:
+            #     with torch.no_grad():
+            #         # quantizer = self.name_to_mezo_part[name].quantizer
+            #         # qweight, absmax, _ = quantizer.quantize_block(param.data)
+            #         # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
+            #         # quantized_tensor, min_val, max_val = custom_quantize(param.data, n_bits)
+            #         # param.data = custom_dequantize(quantized_tensor, min_val, max_val, n_bits)
+            #         param.data = quantize_nbit(param.data, n_bits = 4)
         self.lr_scheduler.step()
 
 
