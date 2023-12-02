@@ -8,7 +8,7 @@ MODEL_NAME="${MODEL_NAME[-1]}"
 
 
 BS=${BS:-16}
-LR=${LR:-1e-7}
+LR=${LR:-1e-6}
 EPS=${EPS:-1e-3}
 SEED=${SEED:-0}
 TRAIN=${TRAIN:-1000}
