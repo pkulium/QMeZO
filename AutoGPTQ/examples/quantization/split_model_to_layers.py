@@ -33,7 +33,7 @@ save_dir = "/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization
 
 # Load the original model
 original_model = AutoModelForCausalLM.from_pretrained(model_name)
-
+print('begin to save')
 # Modify and save parts of the model
 modify_and_save_model(original_model, save_dir)
 
