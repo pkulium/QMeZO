@@ -455,7 +455,6 @@ def add_mezo_parts(model):
 
             # initialse mezo part using xavier
             torch.nn.init.xavier_uniform_(mezo_part.weight)
-            torch.nn.init.xavier_uniform_(mezo_part.bias)
             module.original_layer_weight_dir = None
 
             # use NFQuantizer
