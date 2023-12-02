@@ -835,7 +835,7 @@ class OurTrainer(Trainer):
                     # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
                     # quantized_tensor, min_val, max_val = custom_quantize(param.data, n_bits)
                     # param.data = custom_dequantize(quantized_tensor, min_val, max_val, n_bits)
-                    param.data = quantize_nbit(param.data, n_bits = 2)
+                    param.data = quantize_nbit(param.data, n_bits = 4)
         self.lr_scheduler.step()
 
 
