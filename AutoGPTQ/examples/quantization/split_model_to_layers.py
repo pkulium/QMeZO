@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoConfig
 import os
 
 def save_layer(layer, layer_name, save_dir):
@@ -32,6 +32,7 @@ model_name = "facebook/opt-13b"  # Replace with your model
 save_dir = "/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-layers"
 
 # Load the original model
+config = AutoConfig.from_pretrained(model_name)
 original_model = AutoModelForCausalLM.from_pretrained(model_name)
 print('begin to save')
 # Modify and save parts of the model
