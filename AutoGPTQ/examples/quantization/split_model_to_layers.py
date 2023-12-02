@@ -43,7 +43,7 @@ original_model = AutoModelForCausalLM.from_pretrained(
 )
 print('begin to save')
 # Modify and save parts of the model
-modify_and_save_model(original_model, save_dir)
+modify_and_save_model(original_model.model, save_dir)
 
 # Load the modified model
 # modified_model = load_modified_model(AutoModelForCausalLM, save_dir)
