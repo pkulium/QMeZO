@@ -47,6 +47,7 @@ class OurArguments(TrainingArguments):
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
     load_autogptq_model = True
     quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-1.3b-2bit-128g'
+    init_mezo_zero = False
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
@@ -89,6 +90,7 @@ class OurArguments(TrainingArguments):
     no_eval: bool = False # whether to skip evaluation
     tag: str = "" # saving tag
     save_model_mezo_part: bool = False
+
 
     # Linear probing
     linear_probing: bool = False # whether to do linear probing
@@ -431,8 +433,10 @@ def add_mezo_parts(model):
         if 'k_proj' in name or 'out_proj' in name or 'q_proj' in name or 'v_proj' in name or 'fc1' in name or 'fc2' in name:
             logger.info(f'Inject mezo to name:{name} type:{type(module).__name__}')
             mezo_part = torch.nn.Linear(in_features=module.infeatures, out_features=module.outfeatures, bias=True)
+            # initialse mezo part as zeros
             torch.nn.init.zeros_(mezo_part.weight)
             torch.nn.init.zeros_(mezo_part.bias)
+            # use NFQuantizer
             # mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=64)
             # mezo_part.weight_size = torch.Size([module.outfeatures, module.infeatures])
             # mezo_part.weight_type = model.dtype
