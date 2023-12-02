@@ -437,7 +437,7 @@ def custom_forward(self, x):
 
 name_to_mezo_part = {}
 def add_mezo_parts(model):
-    original_weight_dir = "/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-layers"
+    original_weight_dir = "/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-layers/"
     for name, module in model.named_modules():
         if 'mezo_part' in name:
             if 'weight' in name:
