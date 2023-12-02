@@ -414,8 +414,8 @@ def custom_forward(self, x):
                 layer_state_dict = torch.load(self.original_layer_weight_dir)
                 self.original_layer_weight_dir = None
                 with torch.no_grad():
-                    self.mezo_part.weight.data = layer_state_dict['weight'] - weight.data
-                    
+                    self.mezo_part.weight.data = layer_state_dict['weight'].data - weight.data
+
             if hasattr(self, 'mezo_part'):
                 weight += self.mezo_part.weight.reshape(weight.shape)
             elif hasattr(self, 'lora_A'):
