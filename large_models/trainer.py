@@ -832,7 +832,7 @@ class OurTrainer(Trainer):
                     # quantizer = self.name_to_mezo_part[name].quantizer
                     # qweight, absmax, _ = quantizer.quantize_block(param.data)
                     # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
-                    num_std, num_bits = 2, 2
+                    num_std, num_bits = 2, 4
                     mean, std = param.data.mean(), param.data.std()
                     clip_val = (mean - num_std * std, mean + num_std * std)
                     clip_val = torch.tensor(list(clip_val))
