@@ -208,23 +208,18 @@ OPTIMIZER_NAME = "optimizer.pt"
 SCHEDULER_NAME = "scheduler.pt"
 SCALER_NAME = "scaler.pt"
 
-def custom_quantize(tensor, n_bits):
-    # Determine the range for n-bit representation
-    range_max = 2 ** n_bits - 1
-
-    # Normalize tensor to 0 to range_max
-    min_val, max_val = tensor.min(), tensor.max()
-    normalized_tensor = (tensor - min_val) / (max_val - min_val) * range_max
-
-    # Quantize to n-bit values
-    quantized_tensor = torch.round(normalized_tensor).int()
-    return quantized_tensor, min_val, max_val
-
-def custom_dequantize(quantized_tensor, min_val, max_val, n_bits):
-    # Dequantize back to float
-    range_max = 2 ** n_bits - 1
-    dequantized_tensor = quantized_tensor.float() / range_max * (max_val - min_val) + min_val
-    return dequantized_tensor
+def quant_uniform(input, num_bits=2, clip_val = None):
+    if clip_val!=None:
+        input = torch.where(input < clip_val[1], input, clip_val[1])
+        input = torch.where(input > clip_val[0], input, clip_val[0])
+    print(f"uniform quant with {num_bits}bits")
+    alpha = (input.max() - input.min()).detach()
+    beta = input.min().detach()
+    input_normalized = (input - beta) / (alpha + 1e-8)  # map to 0 to 1
+    s = (2 ** num_bits - 1)
+    quant_input = torch.round(input_normalized * s).div(s)  # map to int between 0 and s(2**num_bits-1)
+    output = quant_input * (alpha + 1e-8) + beta  #
+    return output
 
 def quantize_nbit(tensor, n):
     min_val, max_val = tensor.min(), tensor.max()
@@ -830,10 +825,18 @@ class OurTrainer(Trainer):
             
             if name in self.name_to_mezo_part:
                 with torch.no_grad():
+                    # simple quantization
                     # param.data = quantize_nbit(param.data, n_bits = 4)
-                    quantizer = self.name_to_mezo_part[name].quantizer
-                    qweight, absmax, _ = quantizer.quantize_block(param.data)
-                    param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
+
+                    # NFQuantizer
+                    # quantizer = self.name_to_mezo_part[name].quantizer
+                    # qweight, absmax, _ = quantizer.quantize_block(param.data)
+                    # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
+                    num_std, num_bits = 2, 2
+                    mean, std = param.data.mean(), param.data.std()
+                    clip_val = (mean - num_std * std, mean + num_std * std)
+                    clip_val = torch.tensor(list(clip_val))
+                    param.data = quant_uniform(param.data, num_bits,clip_val)
         self.lr_scheduler.step()
 
 
