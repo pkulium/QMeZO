@@ -6,8 +6,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-pretrained_model_dir = "facebook/opt-1.3b"
-quantized_model_dir = "opt-1.3b-2bit-128g"
+bit, group = 3, 32
+pretrained_model_dir = "facebook/opt-13b"
+quantized_model_dir = "opt-13b-3bit-32g"
 
 # os.makedirs(quantized_model_dir, exist_ok=True)
 def get_wikitext2(nsamples, seed, seqlen, model):
@@ -135,8 +136,8 @@ def main():
     traindataset,testenc = get_wikitext2(128, 0, 2048, pretrained_model_dir)
 
     quantize_config = BaseQuantizeConfig(
-        bits=2,  # quantize model to 4-bit
-        group_size=128,  # it is recommended to set the value to 128
+        bits=bit,  # quantize model to 4-bit
+        group_size=group,  # it is recommended to set the value to 128
         desc_act=False,  # desc_act and group size only works on triton
     )
 
