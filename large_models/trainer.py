@@ -826,17 +826,19 @@ class OurTrainer(Trainer):
             if name in self.name_to_mezo_part:
                 with torch.no_grad():
                     # simple quantization
-                    # param.data = quantize_nbit(param.data, n_bits = 4)
+                    param.data = quantize_nbit(param.data, n_bits = 3)
 
                     # NFQuantizer
                     # quantizer = self.name_to_mezo_part[name].quantizer
                     # qweight, absmax, _ = quantizer.quantize_block(param.data)
                     # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
-                    num_std, num_bits = 2, 4
-                    mean, std = param.data.mean(), param.data.std()
-                    clip_val = (mean - num_std * std, mean + num_std * std)
-                    clip_val = torch.tensor(list(clip_val))
-                    param.data = quant_uniform(param.data, num_bits,clip_val)
+
+                    # clip first
+                    # num_std, num_bits = 2, 4
+                    # mean, std = param.data.mean(), param.data.std()
+                    # clip_val = (mean - num_std * std, mean + num_std * std)
+                    # clip_val = torch.tensor(list(clip_val))
+                    # param.data = quant_uniform(param.data, num_bits,clip_val)
         self.lr_scheduler.step()
 
 
