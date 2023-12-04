@@ -7,8 +7,8 @@ import torch
 import torch.nn as nn
 
 bit, group = 4, 32
-pretrained_model_dir = "facebook/opt-13b"
-quantized_model_dir = f"opt-13b-{bit}bit-{group}g"
+pretrained_model_dir = "facebook/opt-1.3b"
+quantized_model_dir = f"opt-1.3b-{bit}bit-{group}g"
 
 # os.makedirs(quantized_model_dir, exist_ok=True)
 def get_wikitext2(nsamples, seed, seqlen, model):
