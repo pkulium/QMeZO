@@ -835,7 +835,7 @@ class OurTrainer(Trainer):
                     # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
 
                     # clip first
-                    num_std, num_bits = 2, 4
+                    num_std, num_bits = 2, 3
                     # mean, std = param.data.mean(), param.data.std()
                     # clip_val = (mean - num_std * std, mean + num_std * std)
                     # clip_val = torch.tensor(list(clip_val))
