@@ -212,14 +212,14 @@ def quant_uniform(input, num_bits=2, clip_val = None):
     if clip_val!=None:
         input = torch.where(input < clip_val[1], input, clip_val[1])
         input = torch.where(input > clip_val[0], input, clip_val[0])
-    ep = 1e-9
+    # ep = 1e-9
     print(f"uniform quant with {num_bits}bits")
     alpha = (input.max() - input.min()).detach()
     beta = input.min().detach()
-    input_normalized = (input - beta) / (alpha + ep)  # map to 0 to 1
+    input_normalized = (input - beta) / alpha  # map to 0 to 1
     s = (2 ** num_bits - 1)
     quant_input = torch.round(input_normalized * s).div(s)  # map to int between 0 and s(2**num_bits-1)
-    output = quant_input * (alpha + ep) + beta  #
+    output = quant_input * alpha + beta  #
     return output
 
 def quantize_nbit(tensor, n):
