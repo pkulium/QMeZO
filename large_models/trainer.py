@@ -827,12 +827,12 @@ class OurTrainer(Trainer):
             if name in self.name_to_mezo_part:
                 with torch.no_grad():
                     # simple quantization
-                    # param.data = quantize_nbit(param.data, n_bits = 3)
+                    param.data = quantize_nbit(param.data, n_bits = 3)
 
                     # NFQuantizer
-                    quantizer = self.name_to_mezo_part[name].quantizer
-                    qweight, absmax, _ = quantizer.quantize_block(param.data)
-                    param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
+                    # quantizer = self.name_to_mezo_part[name].quantizer
+                    # qweight, absmax, _ = quantizer.quantize_block(param.data)
+                    # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
 
                     # clip first
                     # num_std, num_bits = 2, 3
