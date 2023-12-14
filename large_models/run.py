@@ -46,7 +46,7 @@ class OurArguments(TrainingArguments):
     max_length: int = 2048 # max length the model can take
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
     load_autogptq_model = True
-    quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-1.3b-2bit-128g'
+    quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-32g'
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration
@@ -453,11 +453,6 @@ def add_mezo_parts(model):
             torch.nn.init.zeros_(mezo_part.bias)
             # module.original_layer_weight_dir = original_weight_dir + name + '.pt'
             module.original_layer_weight_dir = None
-
-            # use NFQuantizer
-            # mezo_part.quantizer = NFQuantizer(num_bits=2, method='normal', device=model.device, block_size=32)
-            # mezo_part.quantizer.weight_size = torch.Size([module.outfeatures, module.infeatures])
-            # mezo_part.quantizer.weight_type = model.dtype
             
             mezo_part.to(device=model.device, dtype=model.dtype)
             mezo_part.weight.requires_grad = True
@@ -605,9 +600,8 @@ class Framework:
                     config=config,
                 )
             elif self.args.quantized_model_dir:
-                quantized_model_dir = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-3bit-32g'
                 from auto_gptq import AutoGPTQForCausalLM
-                model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0", use_triton=False)
+                model = AutoGPTQForCausalLM.from_quantized(self.args.quantized_model_dir, device="cuda:0", use_triton=False)
                 model.eval()
                 if (self.args.train_set_seed is not None or self.args.num_train_sets is not None) and not self.args.lora:
                     add_mezo_parts(model)
