@@ -2,7 +2,8 @@
 
 
 # Define the list of tasks
-TASKS=("SST2" "RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "Copa" "ReCoRD" "SQuAD" "DROP")
+# TASKS=("SST2" "RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "Copa" "ReCoRD" "SQuAD" "DROP")
+TASKS=("Copa" "ReCoRD" "SQuAD" "RTE" "BoolQ" "WSC" "WIC" "MultiRC" "DROP")
 
 # Loop over each task
 for TASK in "${TASKS[@]}"; do
