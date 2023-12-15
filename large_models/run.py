@@ -867,7 +867,6 @@ class Framework:
             data_collator=DataCollatorWithPaddingAndNesting(self.tokenizer, pad_to_multiple_of=8) if self.args.train_as_classification else collator(self.tokenizer, pad_to_multiple_of=8),
         )
         trainer.name_to_mezo_part = name_to_mezo_part
-        trainer.max_step = 30000
         if self.args.save_on_interrupt:
             trainer.add_callback(SIGUSR1Callback())
 
