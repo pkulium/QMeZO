@@ -1,7 +1,7 @@
 git pull
 MODEL=facebook/opt-13b
 MODE=ft 
-LR=5e-8
+LR=1e-7
 EPS=1e-3 
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
