@@ -7,7 +7,7 @@ MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
 MODEL_NAME="${MODEL_NAME[-1]}"
 
-BS=${BS:-16}
+BS=${BS:-20}
 LR=${LR:-1e-7}
 EPS=${EPS:-1e-3}
 SEED=${SEED:-0}
