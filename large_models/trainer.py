@@ -824,7 +824,7 @@ class OurTrainer(Trainer):
             else:
                 param.data = param.data - self._get_learning_rate() * (self.projected_grad * z)
             
-            if 'mezo' in name and 'weight' in name:
+            if  name[-16:] == 'mezo_part.weight':
                 with torch.no_grad():
                     # simple quantization
                     # param.data = quantize_nbit(param.data, n_bits = 3)
