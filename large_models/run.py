@@ -23,6 +23,8 @@ from metrics import calculate_metric
 from utils import *
 from trainer import OurTrainer
 import random
+import autogptq_cuda_256
+import autogptq_cuda_64
 
 DEBUG = False
 @dataclass
@@ -462,7 +464,11 @@ def add_mezo_parts(model):
             module.use_cuda_fp16 = True
             module.autogptq_cuda_available = True
             module.kernel_switch_threshold = False
-        
+            module.autogptq_cuda = autogptq_cuda_256
+            if module.infeatures % 256 != 0 or module.outfeatures % 256 != 0:
+                module.autogptq_cuda = autogptq_cuda_64
+            if module.infeatures % 64 != 0 or module.outfeatures % 64 != 0:
+                module.autogptq_cuda_available = False
 
 def find_module(root_module: nn.Module, key: str):
     """
