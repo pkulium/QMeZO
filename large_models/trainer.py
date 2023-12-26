@@ -840,7 +840,6 @@ class OurTrainer(Trainer):
                     # clip_val = (mean - num_std * std, mean + num_std * std)
                     # clip_val = torch.tensor(list(clip_val))
                     # param.data = quant_uniform(param.data, num_bits, clip_val)
-                    param.data = quant_uniform(param.data, num_bits)
         self.lr_scheduler.step()
 
 
