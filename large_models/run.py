@@ -469,6 +469,7 @@ def add_mezo_parts(model):
                 module.autogptq_cuda = autogptq_cuda_64
             if module.infeatures % 64 != 0 or module.outfeatures % 64 != 0:
                 module.autogptq_cuda_available = False
+            module.half_indim = module.infeatures // 2
 
 def find_module(root_module: nn.Module, key: str):
     """
