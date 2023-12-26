@@ -421,8 +421,6 @@ def custom_forward(self, x):
                     print(self.mezo_part.weight.data)
 
             if hasattr(self, 'mezo_part'):
-                with torch.no_grad():
-                    self.mezo_part.weight.data = quant_uniform(self.mezo_part.weight.data , 3)
                 weight += self.mezo_part.weight.reshape(weight.shape)
             elif hasattr(self, 'lora_A'):
                 # weight += (self.lora_B @ self.lora_A).reshape(weight.shape)
