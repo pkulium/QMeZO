@@ -213,7 +213,7 @@ def quant_uniform(input, num_bits=2, clip_val = None):
         input = torch.where(input < clip_val[1], input, clip_val[1])
         input = torch.where(input > clip_val[0], input, clip_val[0])
     # ep = 1e-9
-    print(f"uniform quant with {num_bits}bits")
+    # print(f"uniform quant with {num_bits}bits")
     alpha = (input.max() - input.min()).detach()
     beta = input.min().detach()
     input_normalized = (input - beta) / alpha  # map to 0 to 1
@@ -835,7 +835,7 @@ class OurTrainer(Trainer):
                     # param.data = quantizer.dequantize_block(qweight, absmax, quantizer.weight_size)
 
                     # clip first
-                    num_std, num_bits = 2, 2
+                    num_std, num_bits = 2, 3
                     mean, std = param.data.mean(), param.data.std()
                     clip_val = (mean - num_std * std, mean + num_std * std)
                     clip_val = torch.tensor(list(clip_val))
