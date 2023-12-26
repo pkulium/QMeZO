@@ -827,7 +827,7 @@ class OurTrainer(Trainer):
             if  name[-16:] == 'mezo_part.weight':
                 with torch.no_grad():
                     # simple quantization
-                    param.data = quantize_nbit(param.data, n_bits = 3)
+                    param.data = quantize_nbit(param.data, 3)
 
                     # NFQuantizer
                     # quantizer = self.name_to_mezo_part[name].quantizer
