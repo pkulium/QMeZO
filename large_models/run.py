@@ -462,14 +462,14 @@ def add_mezo_parts(model):
             module.mezo_part = mezo_part
             module.forward = custom_forward.__get__(module)
             module.use_cuda_fp16 = True
-            module.autogptq_cuda_available = True
-            module.kernel_switch_threshold = False
-            module.autogptq_cuda = autogptq_cuda_256
-            if module.infeatures % 256 != 0 or module.outfeatures % 256 != 0:
-                module.autogptq_cuda = autogptq_cuda_64
-            if module.infeatures % 64 != 0 or module.outfeatures % 64 != 0:
-                module.autogptq_cuda_available = False
-            module.half_indim = module.infeatures // 2
+            module.autogptq_cuda_available = False
+            # module.kernel_switch_threshold = False
+            # module.autogptq_cuda = autogptq_cuda_256
+            # if module.infeatures % 256 != 0 or module.outfeatures % 256 != 0:
+            #     module.autogptq_cuda = autogptq_cuda_64
+            # if module.infeatures % 64 != 0 or module.outfeatures % 64 != 0:
+            #     module.autogptq_cuda_available = False
+            # module.half_indim = module.infeatures // 2
 
 def find_module(root_module: nn.Module, key: str):
     """
