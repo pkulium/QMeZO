@@ -460,7 +460,7 @@ def add_mezo_parts(model):
             module.mezo_part = mezo_part
             module.forward = custom_forward.__get__(module)
             module.use_cuda_fp16 = True
-            module.autogptq_cuda_available = False
+            module.autogptq_cuda_available = True
         
 
 def find_module(root_module: nn.Module, key: str):
