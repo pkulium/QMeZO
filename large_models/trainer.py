@@ -824,7 +824,7 @@ class OurTrainer(Trainer):
             else:
                 param.data = param.data - self._get_learning_rate() * (self.projected_grad * z)
             
-            if name in self.name_to_mezo_part:
+            if 'mezo' in name and 'weight' in name:
                 with torch.no_grad():
                     # simple quantization
                     # param.data = quantize_nbit(param.data, n_bits = 3)
@@ -836,11 +836,10 @@ class OurTrainer(Trainer):
 
                     # clip first
                     num_std, num_bits = 2, 2
-                    # mean, std = param.data.mean(), param.data.std()
-                    # clip_val = (mean - num_std * std, mean + num_std * std)
-                    # clip_val = torch.tensor(list(clip_val))
-                    # param.data = quant_uniform(param.data, num_bits, clip_val)
-                    param.data = quant_uniform(param.data, num_bits)
+                    mean, std = param.data.mean(), param.data.std()
+                    clip_val = (mean - num_std * std, mean + num_std * std)
+                    clip_val = torch.tensor(list(clip_val))
+                    param.data = quant_uniform(param.data, num_bits, clip_val)
         self.lr_scheduler.step()
 
 
