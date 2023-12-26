@@ -157,25 +157,19 @@ def quantize(tensor, bits):
     quantized_tensor = torch.round(tensor / scale) * scale
     return quantized_tensor
 
-import torch
-
-def custom_quantize(tensor, n_bits):
-    # Determine the range for n-bit representation
-    range_max = 2 ** n_bits - 1
-
-    # Normalize tensor to 0 to range_max
-    min_val, max_val = tensor.min(), tensor.max()
-    normalized_tensor = (tensor - min_val) / (max_val - min_val) * range_max
-
-    # Quantize to n-bit values
-    quantized_tensor = torch.round(normalized_tensor).int()
-    return quantized_tensor, min_val, max_val
-
-def custom_dequantize(quantized_tensor, min_val, max_val, n_bits):
-    # Dequantize back to float
-    range_max = 2 ** n_bits - 1
-    dequantized_tensor = quantized_tensor.float() / range_max * (max_val - min_val) + min_val
-    return dequantized_tensor
+def quant_uniform(input, num_bits=2, clip_val = None):
+    if clip_val!=None:
+        input = torch.where(input < clip_val[1], input, clip_val[1])
+        input = torch.where(input > clip_val[0], input, clip_val[0])
+    # ep = 1e-9
+    # print(f"uniform quant with {num_bits}bits")
+    alpha = (input.max() - input.min()).detach()
+    beta = input.min().detach()
+    input_normalized = (input - beta) / alpha  # map to 0 to 1
+    s = (2 ** num_bits - 1)
+    quant_input = torch.round(input_normalized * s).div(s)  # map to int between 0 and s(2**num_bits-1)
+    output = quant_input * alpha + beta  #
+    return output
 
 import os
 import torch
@@ -427,6 +421,8 @@ def custom_forward(self, x):
                     print(self.mezo_part.weight.data)
 
             if hasattr(self, 'mezo_part'):
+                with torch.no_grad():
+                    self.mezo_part.weight.data = quant_uniform(self.mezo_part.weight.data , 3)
                 weight += self.mezo_part.weight.reshape(weight.shape)
             elif hasattr(self, 'lora_A'):
                 # weight += (self.lora_B @ self.lora_A).reshape(weight.shape)
