@@ -1,13 +1,15 @@
 git pull
 MODEL=facebook/opt-13b
-MODE=ft 
-LR=1e-7
-EPS=1e-3 
+# TASK=SST2
+MODE=lora 
+LR=5e-6
+EPS=1e-2 
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
 MODEL_NAME="${MODEL_NAME[-1]}"
 
-BS=${BS:-20}
+
+BS=${BS:-16}
 LR=${LR:-1e-7}
 EPS=${EPS:-1e-3}
 SEED=${SEED:-0}
@@ -67,6 +69,8 @@ python run.py \
     --load_best_model_at_end --evaluation_strategy steps --save_strategy steps --save_total_limit 1 \
     --eval_steps $EVAL_STEPS --save_steps $EVAL_STEPS \
     --train_as_classification \
+    --overwrite_output_dir \
+    --save_model False \
     $EXTRA_ARGS \
     $TASK_ARGS \
     "$@"
