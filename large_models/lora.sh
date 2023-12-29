@@ -2,8 +2,8 @@ git pull
 MODEL=facebook/opt-13b
 # TASK=SST2
 MODE=lora 
-LR=7e-5
-EPS=1e-2 
+LR=5e-5
+EPS=1e-3
 MODEL=${MODEL:-facebook/opt-13b}
 MODEL_NAME=(${MODEL//\// })
 MODEL_NAME="${MODEL_NAME[-1]}"
