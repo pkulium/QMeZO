@@ -2,7 +2,7 @@
 
 # Define the list of tasks
 # TASKS=("RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "COPA" "ReCoRD" "SQuAD" "DROP")
-TASKS=("BoolQ" "WSC" "WIC" "MultiRC" "COPA" "ReCoRD" "SQuAD" "DROP")
+TASKS=("CB" "BoolQ" "WSC" "WIC" "MultiRC" "COPA" "ReCoRD" "SQuAD" "DROP")
 
 
 # Loop over each task
