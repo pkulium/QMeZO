@@ -48,7 +48,7 @@ class OurArguments(TrainingArguments):
     max_length: int = 2048 # max length the model can take
     no_auto_device: bool = False # do not load model by auto device; should turn this on when using FSDP
     load_autogptq_model = True
-    quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-2bit-32g'
+    quantized_model_dir:str = '/work/LAS/wzhang-lab/mingl/code/QMeZO/AutoGPTQ/examples/quantization/opt-13b-3bit-32g'
 
     # Calibration
     sfc: bool = False # whether to use SFC calibration

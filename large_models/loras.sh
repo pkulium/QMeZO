@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define the list of tasks
-# TASKS=("RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "COPA" "ReCoRD" "SQuAD" "DROP")
-TASKS=("CB" "BoolQ" "WSC" "WIC" "MultiRC" "COPA" "ReCoRD" "SQuAD" "DROP")
+# TASKS=("SST2" "RTE" "CB" "BoolQ" "WSC" "WIC" "MultiRC" "Copa" "ReCoRD" "SQuAD" "DROP")
+TASKS=("SST2" "RTE" "CB" "BoolQ" "WSC" "WIC" )
 
 
 # Loop over each task
